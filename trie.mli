@@ -7,6 +7,9 @@ type node = (char * node list * string)
 (* A dictionary can be defined by its root node *)
 type dict = node
 
+(* Creates an empty dictionary *)
+val create : unit -> dict
+
 (* Inserts a given word into a dictionary, and
    outputs the new dictionary *)
 val insert : dict -> string -> dict
@@ -19,5 +22,6 @@ val construct : string -> dict
    find and output all the possible valid words that
    can be made with any subset of the set. No order
    is guaranteed. If no words can be made, an empty
-   list is returned. *)
+   list is returned. Only words present in the given
+   dictionary will be returned. *)
 val get_words : dict -> char list -> char list list
