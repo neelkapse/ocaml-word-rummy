@@ -1,3 +1,11 @@
+open Player
+
+type game = {
+  deck : card list;
+  discarded : card list;
+  players : player list;
+}
+
 (* HELPER FUNCTIONS *)
 
 (* Removes one copy of the specified card from the given card list *)
@@ -5,7 +13,7 @@ let rec remove_card (hand: card list) (c: card): card list =
   match hand with
   | [] -> []
   | h::t ->
-    if h = c 
+    if h = c
     then t
     else h :: remove_card t c
 
@@ -25,13 +33,15 @@ let is_over g =
   | [] -> true
   | _ -> false
 
+let steal game p w1 w2 =
+  failwith "unimplemented"
+
 let extend game w1 w2 =
   match game.players with
   | [] -> failwith "no_players"
   | p::_ -> steal game p w1 w2
 
-let steal game p w1 w2 =
-  failwith "unimplemented"
+let update_hand a b = failwith "TODO"
 
 let build game word =
   let rec remove_word hand w =
@@ -49,7 +59,7 @@ let build game word =
     {game with deck = deck'; players = players'}
 
 let draw_card game =
-  match (game.deck, players) with 
+  match (game.deck, players) with
   | ([], _) -> failwith "deck_is_empty"
   | (card::d', p::players_t) ->
     let p' =  {p with hand = card :: (p.hand)} in
@@ -59,7 +69,7 @@ let draw_card game =
 let discard_card game card =
   match game.players with
   | [] -> failwith "no_players"
-  | p::players_t -> 
+  | p::players_t ->
     let discarded' = card :: game.discarded in
     let p' = {p with hand = (remove_card p.hand card)} in
     let players' = p' :: players_t in
