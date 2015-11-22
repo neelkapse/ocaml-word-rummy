@@ -1,32 +1,23 @@
 (* Recursive trie data structure definition.
-   The has_word variable might be unnecessary. *)
-type node = {
-  letter: char;
-  links: node list;
-  word: string;
-  has_word: bool
-}
+   A node is defined by the character it holds,
+   the word it holds, and the list of nodes it
+   is the parent of. *)
+type node = (char * node list * string)
 
 (* A dictionary can be defined by its root node *)
-type dict = {
-  root: node
-}
+type dict = node
 
-(* Inserts a given word into a dictionary, and 
+(* Inserts a given word into a dictionary, and
    outputs the new dictionary *)
 val insert : dict -> string -> dict
 
-(* Given a file name, this function constructs a 
+(* Given a file name, this function constructs a
    dictionary using the words in the file *)
 val construct : string -> dict
 
-(* Checks whether a given word exists in a 
-   dictionary *)
-val has_word : dict -> string -> bool
-
-(* Given a set of characters, this function will 
-   find and output the best possible word that 
-   can be constructed using some subset of the 
-   characters. Returns None if no construction 
-   is possible. *)
-val get_word : dict -> char list -> string option
+(* Given a set of characters, this function will
+   find and output all the possible valid words that
+   can be made with any subset of the set. No order
+   is guaranteed. If no words can be made, an empty
+   list is returned. *)
+val get_words : dict -> char list -> char list list
