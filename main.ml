@@ -11,7 +11,7 @@ let create_random_deck num_cards =
                      'm';'n';'n';'n';'n';'n';'n';'o';'o';'o';'o';'o';'o';
                      'p';'p';'q';'r';'r';'r';'r';'r';'r';'s';'s';'s';'s';
                      't';'t';'t';'t';'t';'t';'u';'u';'u';'u';'v';'v';'w';
-                     'w';'x';'y';'y';'z']
+                     'w';'x';'y';'y';'z'] in
   let letters_with_weights = List.map (fun x -> (x, Random.int 500)) letters in
   let f x y = (snd x) - (snd y) in
   let sorted_weights = List.sort f letters_with_weights in
@@ -19,7 +19,23 @@ let create_random_deck num_cards =
 
 let print_instructions () = print_string "TODO"
 
-let create_player_list num_p num_ai = failwith "TODO"
+let create_player_list num_p num_ai =
+  let create pl ai acc = match (pl, ai) with
+    | (0,0) -> acc
+    | (t,0) -> let new_player = { name = "Player " ^ (string_of_int t);
+                                  hand = [];
+                                  words = [];
+                                  is_ai = false
+                                }
+                                in create (t - 1) 0 (new_player::acc)
+    | (t,v) -> let new_player = { name = "CPU " ^ (string_of_int v);
+                                  hand = [];
+                                  words = [];
+                                  is_ai = true
+                                }
+                                in create t (v-1) (new_player::acc)
+  in
+  create num_p num_ai []
 
 let init () =
   print_string "Enter the number of human players: ";

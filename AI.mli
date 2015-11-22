@@ -1,5 +1,5 @@
 open GameState
-open Trie
+(*open Trie*)
 open Score
 open Player
 
