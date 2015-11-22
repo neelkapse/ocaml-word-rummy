@@ -6,8 +6,10 @@ type word = card list
    words that the player possesses, and whether the player is an
    AI or not. *)
 type player = {
-  name: string;
+  	name: string;
 	hand: card list;
 	words: word list;
 	is_ai: bool
 }
+
+val string_of_player : player -> string
