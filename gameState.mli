@@ -20,7 +20,9 @@ val is_over : game -> bool
 
 (* Perform word building operations *)
 val extend : game -> word -> word -> game
-val steal : game -> player -> word -> word -> game
+
+(* Replaces the word [w1] in  *)
+val steal : game -> string -> word -> word -> game
 val build : game -> word -> game
 
 (* Performs a draw operation. Assumes that game is not over, and that current 
