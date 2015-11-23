@@ -2,6 +2,7 @@ open GameState
 open AI
 open Score
 open Trie
+open Player
 
 let create_random_deck num_cards =
   let letters = ['a';'a';'a';'a';'a';'a';'a';'a';'a';'b';'b';'c';'c';
@@ -20,14 +21,14 @@ let create_random_deck num_cards =
 let print_instructions () = print_string "TODO"
 
 let create_player_list num_p num_ai =
-  let create pl ai acc = match (pl, ai) with
+  let rec create pl ai acc = match (pl, ai) with
     | (0,0) -> acc
     | (t,0) -> let new_player = { name = "Player " ^ (string_of_int t);
                                   hand = [];
                                   words = [];
                                   is_ai = false
                                 }
-                                in create (t - 1) 0 (new_player::acc)
+                                in create (t-1) 0 (new_player::acc)
     | (t,v) -> let new_player = { name = "CPU " ^ (string_of_int v);
                                   hand = [];
                                   words = [];
@@ -36,6 +37,13 @@ let create_player_list num_p num_ai =
                                 in create t (v-1) (new_player::acc)
   in
   create num_p num_ai []
+
+let rec replenish_hand_fst_player g =
+  let num_cards = List.length (List.hd g.players).hand in
+  if (num_cards < 7) then
+    replenish_hand_fst_player (draw_card g)
+  else
+    g
 
 let init () =
   print_string "Enter the number of human players: ";
@@ -62,7 +70,7 @@ let build_turn g d =
 let draw_turn g d =
   failwith "TODO"
 
-let turn_minus_intro g d =
+let rec turn_minus_intro g d =
   let _ = print_string "\nWould you like to STEAL a word, BUILD a word, or
                         DRAW cards?\n" in
   let player_input = String.uppercase (read_line()) in
@@ -77,10 +85,11 @@ let turn_minus_intro g d =
     turn_minus_intro g d
 
 let turn g d =
+  let g_after_draw = replenish_hand_fst_player g in
   let curr_player = List.hd g.players in
-  Printf.printf "It is now %s's turn.\n\n" curr_player.name in
-  let _ = print_string string_of_game g in
-  turn_minus_intro g d
+  Printf.printf "It is now %s's turn.\n\n" curr_player.name;
+  let _ = print_string (string_of_game g_after_draw) in
+  turn_minus_intro g_after_draw d
 
 
 
