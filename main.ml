@@ -62,16 +62,33 @@ let init () =
   (gs, dict)
 
 let steal_turn g d =
+  let old_string = print_string "Enter the word you wish to steal: ";
+                   read_line () in
+  let new_string = print_string "Please enter the new word you wish to form: ";
+                   read_line () in
   failwith "TODO"
 
 let build_turn g d =
+  let new_string = print_string "Enter the new word you wish to build: ";
+                   read_line () in
   failwith "TODO"
 
 let draw_turn g d =
+  let new_string = print_string "Enter the cards you wish to discard as
+                                 a string without spaces or punctuation: ";
+                   read_line () in
+  failwith "TODO"
+
+let extend_turn g d =
+  let old_string = print_string "Enter the word you wish to extend: ";
+                   read_line () in
+  let new_string = print_string "Enter the new word you wish to form: ";
+                   read_line () in
   failwith "TODO"
 
 let rec turn_minus_intro g d =
-  let _ = print_string "\nWould you like to STEAL a word, BUILD a word, or
+  let _ = print_string "\nWould you like to STEAL a word, BUILD a new word,
+                        EXTEND one of your words or
                         DRAW cards?\n" in
   let player_input = String.uppercase (read_line()) in
   if player_input = "DRAW" then
@@ -80,6 +97,8 @@ let rec turn_minus_intro g d =
     steal_turn g d
   else if player_input = "DRAW" then
     draw_turn g d
+  else if player_input = "EXTEND" then
+    extend_turn g d
   else
     print_string "Invalid input. Try again.\n";
     turn_minus_intro g d
