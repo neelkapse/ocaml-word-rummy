@@ -86,6 +86,8 @@ let extend_turn g d =
                    read_line () in
   failwith "TODO"
 
+let print_final_results g = failwith "TODO"
+
 let rec turn_minus_intro g d =
   let _ = print_string "\nWould you like to STEAL a word, BUILD a new word,
                         EXTEND one of your words or
@@ -104,11 +106,14 @@ let rec turn_minus_intro g d =
     turn_minus_intro g d
 
 let turn g d =
-  let g_after_draw = replenish_hand_fst_player g in
-  let curr_player = List.hd g.players in
-  Printf.printf "It is now %s's turn.\n\n" curr_player.name;
-  let _ = print_string (string_of_game g_after_draw) in
-  turn_minus_intro g_after_draw d
+  if is_over g then
+    print_final_results g
+  else
+    let g_after_draw = replenish_hand_fst_player g in
+    let curr_player = List.hd g.players in
+    Printf.printf "It is now %s's turn.\n\n" curr_player.name;
+    let _ = print_string (string_of_game g_after_draw) in
+    turn_minus_intro g_after_draw d
 
 
 
