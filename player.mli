@@ -9,10 +9,10 @@ type word = card list
  * RI: [name] must be unique for each player
 *)
 type player = {
-    name: string;
-    hand: card list;
-    words: word list;
-    is_ai: bool
+  name: string;
+  hand: card list;
+  words: word list;
+  is_ai: bool
 }
 
 val string_of_player : player -> string
