@@ -158,7 +158,7 @@ let construct (filename : string) : dict =
    is guaranteed. If no words can be made, an empty
    list is returned. Only words present in the given
    dictionary will be returned. *)
-let rec getWords (dictionary : dict) (cards : char list) : char list list =
+let rec get_words (dictionary : dict) (cards : char list) : char list list =
   let cards = sortCharList cards in
   let cards = List.map lowercase cards in
   collectWords cards dictionary
