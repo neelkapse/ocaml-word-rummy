@@ -1,11 +1,13 @@
 open GameState
 open Player
 
+type steal_tup = string * word * word
+
 let ai_trie = Trie.construct "SixtyK.txt"
 
 (* Return true if gen_word contains all cards in steal_word and gen_word is
  * longer than steal_word. Return false otherwise. *)
-let contains_word1 (steal_word: word) (gen_word: word): bool =
+let contains_word (steal_word: word) (gen_word: word): bool =
   (* If w contains card c, return w without card c. Otherwise, return an empty
    * list. *)
   let remove_char w c =
@@ -23,7 +25,7 @@ let contains_word1 (steal_word: word) (gen_word: word): bool =
 
 (* Return true if gen_word contains all cards in steal_word and gen_word is
  * longer than steal_word. Return false otherwise. *)
-let contains_word2 (steal_word: word) (gen_word: word): bool =
+let contains_word (steal_word: word) (gen_word: word): bool =
   (* Increments the value in arr at the index corresponding to card c. *)
   let inc arr c =
     let i = Char.code c - 65 in
@@ -44,43 +46,47 @@ let contains_word2 (steal_word: word) (gen_word: word): bool =
     comp_arr steal_count gen_count 26
   else false
 
-(* Return the word with the higher score (return word2 if the scores are
- * equal). *)
-let score_comp (word1: word) (word2: word): word =
-  if Score.word_value word1 > Score.word_value word2 then word1 else word2
+(* Return the word with the higher score (return w2 if the scores are equal). *)
+let score_comp (w1: word) (w2: word): word =
+  if Score.word_value w1 > Score.word_value w2 then w1 else w2
+
+(* Return the pair containing the word with the higher score (return t2 if the 
+ * scores are equal). *)
+let score_comp_pair (t1: steal_tup) (t2: steal_tup): steal_tup =
+  let ((_,_,w1), (_,_,w2)) = (t1, t2) in
+  if Score.word_value w1 > Score.word_value w2 then t1 else t2
 
 (* Return Some wd where wd is the best word that can be made from w and letters
  * if any word can be made. Return None if no word can be made. *)
 let best_word (letters: card list) (w: word): word option =
-  let gen_words = Trie.get_words ai_trie (w@letters) in
-  let is_valid_word = contains_word1 w in
+  let gen_words = Trie.get_words ai_trie (List.rev_append letters w) in
+  let is_valid_word = contains_word w in
   match List.filter is_valid_word gen_words with
-  | []   -> None
   | h::t -> Some (List.fold_left score_comp h t)
+  | []   -> None
 
-let play_not_steal (g: game) (p: player): game =
-  failwith "unimplemented"
+let best_word_build (letters: card list): word option = best_word [] letters
 
-let play_steal (g: game) (p: player) (lst: (string * word) list): game =
-  failwith "unimplemented"
+let play_steal (g: game) (p: player) ((n, w, bw): steal_tup): game =
+  if p.name = n then extend g w bw
+  else steal g n w bw
+
+let play_no_steal (g: game) (p: player): game =
+  match best_word_build p.hand with
+  | Some w -> build g w
+  | None   -> failwith "unimplemented"
 
 let play_turn (g: game) (p: player): game =
-  let best_player_word =
-    let opt_best_word w1 w2 =
-      match (w1, w2) with
-      | (_, None)          -> w1
-      | (None, _)          -> w2
-      | (Some w3, Some w4) -> Some (score_comp w3 w4) in
-    List.fold_left opt_best_word None in
-  let opt_filter l (name, b_word) =
-    match b_word with
-    | None   -> l
-    | Some w -> (name, w)::l in
+  let flatten_words lst pl =
+    let remap l w = (pl.name, w, best_word p.hand w)::l in
+    List.fold_left remap lst pl.words in
+  let opt_filter l (name, w, bword) =
+    match bword with
+    | Some bw -> (name, w, bw)::l
+    | None    -> l in
   let steal_word_list = g.players
-    |> List.map (fun p -> (p.name, p.words))
-    |> List.map (fun (name, words) -> (name, List.map (best_word p.hand) words))
-    |> List.map (fun (name, b_words) -> (name, best_player_word b_words))
+    |> List.fold_left flatten_words []
     |> List.fold_left opt_filter [] in
   match steal_word_list with
-  | [] -> play_not_steal g p
-  | _  -> play_steal g p steal_word_list
+  | h::t -> play_steal g p (List.fold_left score_comp_pair h t)
+  | []   -> play_no_steal g p
