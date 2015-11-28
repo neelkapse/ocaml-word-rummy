@@ -88,4 +88,11 @@ let discard_card game card =
     {game with discarded = discarded'; players = players'}
 
 let string_of_game g =
-  failwith "unimplemented"
+  let rec string_of_player_list ps =
+    match ps with
+    | [] -> ""
+    | h::t -> (string_of_player h) ^ (string_of_player_list t) in
+  match g.players with
+  | [] -> failwith "no_players"
+  | p::_ -> 
+    "TURN:\n\t" ^ p.name ^ "\nPLAYERS:\n\t" ^ string_of_player_list (g.players)
