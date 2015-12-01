@@ -4,6 +4,10 @@ open Score
 open Trie
 open Player
 
+let is_valid_word_create g w dict = failwith "TODO"
+
+let is_valid_word_steal g w1 w2 dict = failwith "TODO"
+
 let create_random_deck num_cards =
   let letters = ['a';'a';'a';'a';'a';'a';'a';'a';'a';'b';'b';'c';'c';
                      'd';'d';'d';'d';'e';'e';'e';'e';'e';'e';'e';'e';'e';
@@ -66,12 +70,37 @@ let steal_turn g d =
                    read_line () in
   let new_string = print_string "Please enter the new word you wish to form: ";
                    read_line () in
-  failwith "TODO"
+  if is_valid_word_steal g old_string new_string d then
+    print_string "You successfully stole a word. Your turn is over";
+    let new_gs = steal g string_filler_input old_string new_string in
+    let next_turn_gs = {
+      deck = new_gs.deck;
+      discarded = new_gs.discarded;
+      players = (List.tl new_gs.players) @ (List.hd new_gs.players)
+    }
+    in
+    turn next_turn_gs d
+  else
+    print_string "That was an invalid choice...let's try that again.\n";
+    steal_turn g d
+
 
 let build_turn g d =
   let new_string = print_string "Enter the new word you wish to build: ";
-                   read_line () in
-  failwith "TODO"
+                   String.uppercase (read_line ()) in
+  if is_valid_word_create g new_string d then
+    print_string "You successfully created a new word. Your turn is over";
+    let new_gs = build g new_string in
+    let next_turn_gs = {
+      deck = new_gs.deck;
+      discarded = new_gs.discarded;
+      players = (List.tl new_gs.players) @ (List.hd new_gs.players)
+    }
+    in
+    turn next_turn_gs d
+  else
+    print_string "That was an invalid choice...let's try that again.\n";
+    build_turn g d
 
 let draw_turn g d =
   let new_string = print_string "Enter the cards you wish to discard as
