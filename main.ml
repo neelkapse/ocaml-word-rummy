@@ -73,13 +73,7 @@ let steal_turn g d =
   if is_valid_word_steal g old_string new_string d then
     print_string "You successfully stole a word. Your turn is over";
     let new_gs = steal g string_filler_input old_string new_string in
-    let next_turn_gs = {
-      deck = new_gs.deck;
-      discarded = new_gs.discarded;
-      players = (List.tl new_gs.players) @ (List.hd new_gs.players)
-    }
-    in
-    turn next_turn_gs d
+    turn (rotate new_gs) d
   else
     print_string "That was an invalid choice...let's try that again.\n";
     steal_turn g d
@@ -91,13 +85,7 @@ let build_turn g d =
   if is_valid_word_create g new_string d then
     print_string "You successfully created a new word. Your turn is over";
     let new_gs = build g new_string in
-    let next_turn_gs = {
-      deck = new_gs.deck;
-      discarded = new_gs.discarded;
-      players = (List.tl new_gs.players) @ (List.hd new_gs.players)
-    }
-    in
-    turn next_turn_gs d
+    turn (rotate new_gs) d
   else
     print_string "That was an invalid choice...let's try that again.\n";
     build_turn g d

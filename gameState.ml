@@ -28,10 +28,15 @@ let rec get_cards (deck: card list) (i: int) : (card list * card list) =
 
 (* PUBLIC METHODS *)
 
-let is_over (g: game) =
+let is_over g =
   match g.deck with
   | [] -> true
   | _ -> false
+
+let rotate g =
+  match g.players with
+  | [] -> failwith "no_players"
+  | h::t -> {g with players = t@[h]}
 
 let steal game name w1 w2 =
   let rec steal_from_player ps =

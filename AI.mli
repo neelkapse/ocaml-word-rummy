@@ -1,5 +1,6 @@
 open GameState
 open Player
+open Score
 
 (* Given the game state, the dictionary, and a specific player,
    this function will 'think' of the best move for the player

@@ -18,10 +18,10 @@ type game = {
 (* Returns true if game is over (i.e. if the deck is empty) *)
 val is_over : game -> bool
 
+val rotate : game -> game
+
 (* Perform word building operations *)
 val extend : game -> word -> word -> game
-
-(* Replaces the word [w1] in  *)
 val steal : game -> string -> word -> word -> game
 val build : game -> word -> game
 
