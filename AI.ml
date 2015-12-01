@@ -74,12 +74,21 @@ let play_steal (g: game) (p: player) ((n, w, bw): steal_tup): game =
 let play_no_steal (g: game) (p: player): game =
   match best_word_build p.hand with
   | Some w -> build g w
-  | None   -> failwith "unimplemented"
+  | None   ->
+    let g1 = draw_card g in
+    match g1.players with
+    | p1::_ -> discard_card g (List.nth p1.hand (List.length p1.hand - 1))
+    | []    -> assert false
 
 let play_turn (g: game) (p: player): game =
+  (* For each word in pl.words, create a tuple containing pl.name, the best word
+   * that can be generated from the word, and the word itself and then cons this
+   * tuple to lst. *)
   let flatten_words lst pl =
     let remap l w = (pl.name, w, best_word p.hand w)::l in
     List.fold_left remap lst pl.words in
+  (* If bword is Some bw, then generate the tuple (name, w, bw) and return the
+   * tuple cons l. Otherwise, return l. *)
   let opt_filter l (name, w, bword) =
     match bword with
     | Some bw -> (name, w, bw)::l
