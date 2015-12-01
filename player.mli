@@ -15,4 +15,5 @@ type player = {
   is_ai: bool
 }
 
+val string_of_hand : player -> string
 val string_of_player : player -> string
