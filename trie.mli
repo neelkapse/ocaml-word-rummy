@@ -3,7 +3,7 @@
    the word it holds, and the list of nodes it
    is the parent of. *)
 type node =
-   | Root
+   | Sentinel
    | Node of char * (node list) * string
 
 (* A dictionary can be defined by its root node *)
