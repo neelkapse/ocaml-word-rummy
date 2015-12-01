@@ -34,8 +34,16 @@ let card_value c =
 
 let word_value = List.fold_left (fun v c -> v + card_value c) 0
 
-(* Return true if gen_word contains all cards in steal_word and gen_word is
- * longer than steal_word. Return false otherwise. *)
+let string_to_word s =
+  let len = String.length s in
+  let rec strip w i =
+    if i = -1 then w
+    else strip ((get s i)::w) (i - 1) in
+  strip [] (len - 1)
+
+let is_valid_word d w =
+  
+
 let is_valid_construct (steal_word: word) (gen_word: word): bool =
   (* If w contains card c, return w without card c. Otherwise, return an empty
    * list. *)
@@ -52,8 +60,6 @@ let is_valid_construct (steal_word: word) (gen_word: word): bool =
   | [] -> false
   | _  -> true
 
-(* Return true if gen_word contains all cards in steal_word and gen_word is
- * longer than steal_word. Return false otherwise. *)
 let is_valid_construct (steal_word: word) (gen_word: word): bool =
   (* Increments the value in arr at the index corresponding to card c. *)
   let inc arr c =
