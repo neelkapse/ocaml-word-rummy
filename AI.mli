@@ -1,6 +1,4 @@
 open GameState
-(*open Trie*)
-open Score
 open Player
 
 (* Given the game state, the dictionary, and a specific player,
