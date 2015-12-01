@@ -13,7 +13,7 @@ let rec remove_element (xs: 'a list) (x: 'a): 'a list =
   match xs with
   | [] -> []
   | h::t ->
-    if h = x 
+    if h = x
     then t
     else h :: remove_element t x
 
@@ -33,14 +33,14 @@ let is_over (g: game) =
   | [] -> true
   | _ -> false
 
-let steal game name w1 w2 = 
+let steal game name w1 w2 =
   let rec steal_from_player ps =
     match ps with
     | [] -> []
     | p::t ->
-      if p.name = name then 
+      if p.name = name then
         {p with words = (remove_element p.words w1)} :: t
-      else 
+      else
         p :: (steal_from_player t) in
   match game.players with
   | [] -> failwith "no_players"
@@ -70,7 +70,7 @@ let build game word =
     {game with deck = deck'; players = players'}
 
 let draw_card game =
-  match (game.deck, game.players) with 
+  match (game.deck, game.players) with
   | ([], _) -> failwith "deck_is_empty"
   | (_, []) -> failwith "no_players"
   | (card::d', p::players_t) ->
@@ -81,7 +81,7 @@ let draw_card game =
 let discard_card game card =
   match game.players with
   | [] -> failwith "no_players"
-  | p::players_t -> 
+  | p::players_t ->
     let discarded' = card :: game.discarded in
     let p' = {p with hand = (remove_element p.hand card)} in
     let players' = p' :: players_t in
