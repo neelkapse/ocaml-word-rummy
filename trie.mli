@@ -2,9 +2,7 @@
    A node is defined by the character it holds,
    the word it holds, and the list of nodes it
    is the parent of. *)
-type node =
-   | Sentinel
-   | Node of char * (node list) * string
+type node = Node of char * (node list) * string
 
 (* A dictionary can be defined by its root node *)
 type dict = node
