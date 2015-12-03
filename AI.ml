@@ -24,21 +24,21 @@ let best_word (t: Trie.dict) (letters: card list) (w: word): word option =
   | []   -> None
 
 let best_word_build (t: Trie.dict) (letters: card list): word option =
-  best_word t [] letters
+  best_word t letters []
 
 let play_steal (g: game) (p: player) ((n, w, bw): steal_tup): game =
-  if p.name = n then rotate (extend g w bw)
-  else rotate (steal g n w bw)
+  if p.name = n then extend g w bw
+  else steal g n w bw
 
 let play_no_steal (g: game) (p: player) (t: Trie.dict): game =
   match best_word_build t p.hand with
-  | Some w -> rotate (build g w)
+  | Some w -> build g w
   | None   ->
     let g1 = draw_card g in
     match g1.players with
     | p1::_ ->
       let c = (List.nth p1.hand (List.length p1.hand - 1)) in
-      rotate (discard_card g c)
+      discard_card g c
     | []    -> failwith "no_players"
 
 let play_turn g t =
@@ -62,4 +62,6 @@ let play_turn g t =
     |> List.fold_left opt_filter [] in
   match steal_word_list with
   | h::t -> play_steal g p (List.fold_left score_comp_pair h t)
-  | []   -> play_no_steal g p t
+  | []   -> 
+    let _ = Printf.printf "play_no_steal entered by %s\n" (List.hd (g.players)).name in
+    play_no_steal g p t

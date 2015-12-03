@@ -49,7 +49,7 @@ let draw_card game =
 
 let rec replenish_hand g =
   let num_cards = List.length (List.hd g.players).hand in
-  if (num_cards < 7) then
+  if num_cards < 7 && not (is_over g) then
     replenish_hand (draw_card g)
   else
     g

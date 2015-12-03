@@ -11,7 +11,7 @@ type player = {
 let rec string_of_char_list cs sep =
   match cs with
   | [] -> ""
-  | h::t -> Bytes.(uppercase (make 1 h)) ^ sep ^ string_of_char_list t sep
+  | h::t -> Bytes.make 1 h ^ sep ^ string_of_char_list t sep
 
 let string_of_hand p = string_of_char_list p.hand " "
 

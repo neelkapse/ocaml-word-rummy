@@ -28,16 +28,9 @@ let print_result g =
     printf "And....the winners are: %s"
       (fold_left (fun acc x -> acc ^ ", " ^ x.name) h.name t)
 
-let string_to_word s =
-  let len = String.length s in
-  let rec strip w i =
-    if i = -1 then w
-    else strip ((String.get s i)::w) (i - 1) in
-  strip [] (len - 1)
-
 let create_random_deck () =
   Random.self_init ();
-  let letters = ['a';'a';'a';'a';'a';'a';'a';'a';'a';'b';'b';'c';'c';
+  let letters_l = ['a';'a';'a';'a';'a';'a';'a';'a';'a';'b';'b';'c';'c';
                  'd';'d';'d';'d';'e';'e';'e';'e';'e';'e';'e';'e';'e';
                  'e';'e';'e';'f';'f';'g';'g';'g';'h';'h';'i';'i';'i';
                  'i';'i';'i';'i';'i';'i';'j';'k';'l';'l';'l';'l';'m';
@@ -45,6 +38,8 @@ let create_random_deck () =
                  'p';'p';'q';'r';'r';'r';'r';'r';'r';'s';'s';'s';'s';
                  't';'t';'t';'t';'t';'t';'u';'u';'u';'u';'v';'v';'w';
                  'w';'x';'y';'y';'z'] in
+  let letters_k = letters_l @ letters_l in
+  let letters = List.map (Char.uppercase) letters_k in
   let letters_with_weights = List.map (fun x -> (x, Random.int 500)) letters in
   let f x y = (snd x) - (snd y) in
   let sorted_weights = List.sort f letters_with_weights in
@@ -111,7 +106,7 @@ let rec build_turn g (tri_d, hash_d) =
                            string_to_word (String.uppercase (read_line ())) in
   let curr_player = List.hd g.players in
   let hand = curr_player.hand in
-  if is_valid_build hash_d new_word hand then 
+  if is_valid_build hash_d new_word hand then
     build g new_word
   else
     let _ = print_string "That was an invalid choice...let's try that again." in
@@ -129,8 +124,7 @@ let rec human_turn g (tri_d, hash_d) =
     | "STEAL" -> steal_turn g (tri_d, hash_d)
     | "BUILD" -> build_turn g (tri_d, hash_d)
     | "EXTEND" -> extend_turn g (tri_d, hash_d)
-    | _ -> print_string "Invalid input. Try again.\n";
-                                                human_turn g (tri_d, hash_d)
+    | _ -> print_string "Invalid input. Try again.\n"; human_turn g (tri_d, hash_d)
 
 let ai_turn g (tri_d, hash_d) =
   print_string "The AI is thinking...\n";
