@@ -99,7 +99,22 @@ let init () =
   in
   (gs, ai_trie, dictionary)
 
-let draw_turn g (tri_d, hash_d) = failwith "TODO"
+let draw_turn g (tri_d, hash_d) =
+  let after_draw = draw_card g in
+  let drawn_hand = (List.hd after_draw.players).hand in
+  let drawn_card = List.hd drawn_hand in
+  Printf.printf "You just drew a card with letter %c.\n" drawn_card;
+  print_string ("You must discard one card. Which letter would you like to " ^
+                                                                  "discard?\n");
+  let discard_letter_string = String.uppercase (read_line ()) in
+  let f = fun x -> String.make 1 x = discard_letter_string in
+  let is_valid = List.exists f drawn_hand in
+  if is_valid then
+    discard_card after_draw (String.get discard_letter_string 0)
+  else
+    let _ = print_string ("That was an invalid choice...as a result, " ^
+                                         "you discarded the card you drew.") in
+    discard_card after_draw (drawn_card)
 
 let rec build_turn g (tri_d, hash_d) =
   let new_word = print_string "Enter the new word you wish to build: ";
@@ -112,9 +127,41 @@ let rec build_turn g (tri_d, hash_d) =
     let _ = print_string "That was an invalid choice...let's try that again." in
     (build_turn g (tri_d, hash_d))
 
-let extend_turn g (tri_d, hash_d) = failwith "TODO"
+let rec extend_turn g (tri_d, hash_d) =
+  let curr_player = List.hd g.players in
+  let curr_word_list = curr_player.words in
+  print_string "Enter the word of yours you wish to extend: ";
+  let old_word = string_to_word (String.uppercase (read_line ())) in
+  print_string "Enter the new word you wish to form: ";
+  let new_word = string_to_word (String.uppercase (read_line ())) in
+  if (List.mem old_word curr_word_list) &&
+            (is_valid_construct hash_d old_word new_word curr_player.hand) then
+    extend g old_word new_word
+  else
+    let _ = print_string "That was an invalid choice...let's try that again." in
+    extend_turn g (tri_d, hash_d)
 
-let steal_turn g (tri_d, hash_d) = failwith "TODO"
+let rec steal_turn g (tri_d, hash_d) =
+  print_string ("Enter the name of the player you wish to steal from " ^
+                                        "(capitalization and spacing MATTERS!");
+  let name = read_line () in
+  let finder = fun x -> (x.name = name) in
+  if List.exists finder g.players then
+    let curr_player = List.find finder g.players in
+    let curr_word_list = curr_player.words in
+    print_string "Enter the word you wish to steal: ";
+    let old_word = string_to_word (String.uppercase (read_line ())) in
+    print_string "Enter the new word you wish to form: ";
+    let new_word = string_to_word (String.uppercase (read_line ())) in
+    if (List.mem old_word curr_word_list) &&
+            (is_valid_construct hash_d old_word new_word curr_player.hand) then
+      steal g name old_word new_word
+    else
+      let _ = print_string "That was an invalid choice...let's try that again." in
+      steal_turn g (tri_d, hash_d)
+  else
+    let _ = print_string "That was an invalid choice...let's try that again." in
+    steal_turn g (tri_d, hash_d)
 
 let rec human_turn g (tri_d, hash_d) =
   print_string ("\nWould you like to STEAL a word, BUILD a new word," ^
