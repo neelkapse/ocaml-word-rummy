@@ -85,7 +85,8 @@ let init () =
   let ic = open_in filename in
   let rec insert_words (ic : in_channel) : unit =
     try
-      let () = Hashtbl.add dictionary (string_to_word (input_line ic)) true in
+      let s = String.uppercase (input_line ic) in
+      let () = Hashtbl.add dictionary (string_to_word s) true in
       insert_words ic
     with
     | e -> () in
@@ -109,7 +110,7 @@ let rec build_turn g (tri_d, hash_d) =
                            string_to_word (String.uppercase (read_line ())) in
   let curr_player = List.hd g.players in
   let hand = curr_player.hand in
-  if is_valid_build hash_d new_word hand then
+  if is_valid_build hash_d new_word hand then 
     build g new_word
   else
     let _ = print_string "That was an invalid choice...let's try that again." in
