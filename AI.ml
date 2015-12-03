@@ -1,6 +1,6 @@
 open GameState
 open Player
-open Score
+open Toolbox
 
 type steal_tup = string * word * word
 
@@ -8,7 +8,7 @@ type steal_tup = string * word * word
 let score_comp (w1: word) (w2: word): word =
   if word_value w1 > word_value w2 then w1 else w2
 
-(* Return the pair containing the word with the higher score (return t2 if the 
+(* Return the pair containing the word with the higher score (return t2 if the
  * scores are equal). *)
 let score_comp_pair (t1: steal_tup) (t2: steal_tup): steal_tup =
   let ((_,_,w1), (_,_,w2)) = (t1, t2) in

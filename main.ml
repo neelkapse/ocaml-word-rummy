@@ -1,14 +1,41 @@
 open GameState
 open AI
-open Score
+open Toolbox
 open Trie
 open Player
 
-let is_valid_word_create g w dict = failwith "TODO"
+let print_result g =
+  let open List in
+  let open Printf in
+  let rec create_score_list = function
+    | [] -> []
+    | h::t ->
+      (fold_left (fun acc x -> acc + word_value x) 0 h.words)::(create_score_list t) in
+  let _ = print_string (string_of_game g) in
+  let score_list = create_score_list g.players in
+  let max_score =
+    match score_list with
+    | [] -> failwith "no_players"
+    | h::t -> fold_left (fun max x -> if x > max then x else max) h t in
+  let _ = iter2
+    (fun x y -> printf "%s :\t%d\n" x.name y) g.players score_list in
+  let winners =
+    filter (fun (_,x) -> x = max_score) (combine g.players score_list) |> split |> fst in
+  match winners with
+  | [] -> failwith "no_winner"
+  | [x] -> printf "And...the winner is :\t%s!!! Congratulations!" x.name
+  | h::t ->
+    printf "And....the winners are: %s"
+      (fold_left (fun acc x -> acc ^ ", " ^ x.name) h.name t)
 
-let is_valid_word_steal g w1 w2 dict = failwith "TODO"
+let string_to_word s =
+  let len = String.length s in
+  let rec strip w i =
+    if i = -1 then w
+    else strip ((String.get s i)::w) (i - 1) in
+  strip [] (len - 1)
 
-let create_random_deck num_cards =
+let create_random_deck () =
   let letters = ['a';'a';'a';'a';'a';'a';'a';'a';'a';'b';'b';'c';'c';
                  'd';'d';'d';'d';'e';'e';'e';'e';'e';'e';'e';'e';'e';
                  'e';'e';'e';'f';'f';'g';'g';'g';'h';'h';'i';'i';'i';
@@ -22,7 +49,12 @@ let create_random_deck num_cards =
   let sorted_weights = List.sort f letters_with_weights in
   List.map (fun x -> fst x) sorted_weights
 
-let print_instructions () = print_string "TODO"
+let rec init_player_cards g num_players =
+  if num_players = 0 then
+    g
+  else
+    init_player_cards (g |> replenish_hand |> rotate) (num_players - 1)
+
 
 let create_player_list num_p num_ai =
   let rec create pl ai acc = match (pl, ai) with
@@ -32,7 +64,7 @@ let create_player_list num_p num_ai =
                                   words = [];
                                   is_ai = false
                                 }
-                                in create (t-1) 0 (new_player::acc)
+                              in create (t-1) 0 (new_player::acc)
     | (t,v) -> let new_player = { name = "CPU " ^ (string_of_int v);
                                   hand = [];
                                   words = [];
@@ -42,112 +74,81 @@ let create_player_list num_p num_ai =
   in
   create num_p num_ai []
 
-let rec replenish_hand_fst_player g =
-  let num_cards = List.length (List.hd g.players).hand in
-  if (num_cards < 7) then
-    replenish_hand_fst_player (draw_card g)
-  else
-    g
-
-let steal_turn g d =
-  let old_string = print_string "Enter the word you wish to steal: ";
-                   read_line () in
-  let new_string = print_string "Please enter the new word you wish to form: ";
-                   read_line () in
-  if is_valid_word_steal g old_string new_string d then
-    print_string "You successfully stole a word. Your turn is over";
-    let new_gs = steal g string_filler_input old_string new_string in
-    turn (rotate new_gs) d
-  else
-    print_string "That was an invalid choice...let's try that again.\n";
-    steal_turn g d
-
-
-let build_turn g d =
-  let new_string = print_string "Enter the new word you wish to build: ";
-                   String.uppercase (read_line ()) in
-  if is_valid_word_create g new_string d then
-    print_string "You successfully created a new word. Your turn is over";
-    let new_gs = build g new_string in
-    turn (rotate new_gs) d
-  else
-    print_string "That was an invalid choice...let's try that again.\n";
-    build_turn g d
-
-let draw_turn g d =
-  let new_string = print_string "Enter the cards you wish to discard as
-                                 a string without spaces or punctuation: ";
-                   read_line () in
-  failwith "TODO"
-
-let extend_turn g d =
-  let old_string = print_string "Enter the word you wish to extend: ";
-                   read_line () in
-  let new_string = print_string "Enter the new word you wish to form: ";
-                   read_line () in
-  failwith "TODO"
-
-let print_final_results g = failwith "TODO"
-
-let rec turn_minus_intro g d =
-  let _ = print_string "\nWould you like to STEAL a word, BUILD a new word,
-                        EXTEND one of your words or
-                        DRAW cards?\n" in
-  let player_input = String.uppercase (read_line()) in
-  if player_input = "DRAW" then
-    draw_turn g d
-  else if player_input = "STEAL" then
-    steal_turn g d
-  else if player_input = "DRAW" then
-    draw_turn g d
-  else if player_input = "EXTEND" then
-    extend_turn g d
-  else
-    print_string "Invalid input. Try again.\n";
-    turn_minus_intro g d
-
-let ai_turn_minus_intro g d =
-  print_string "The AI is thinking...\n";
-  turn (play_turn g) d
-
-let turn g d =
-  if is_over g then
-    print_final_results g
-  else
-    let g_after_draw = replenish_hand_fst_player g in
-    let curr_player = List.hd g.players in
-    Printf.printf "It is now %s's turn.\n\n" curr_player.name;
-    let _ = print_string (string_of_game g_after_draw) in
-    if curr_player.is_ai then
-      ai_turn_minus_intro g d
-    else
-      turn_minus_intro g_after_draw d
-
 let init () =
   print_string "Enter the number of human players: ";
   let num_players = int_of_string (read_line ()) in
   print_string "Enter the number of cpu players: ";
   let num_AI = int_of_string (read_line ()) in
   print_string "Enter the file name of your dictionary: ";
-  let dict_file = read_line () in
+  let filename = read_line () in
   let dictionary = Hashtbl.create 80_000 in
   let ic = open_in filename in
   let rec insert_words (ic : in_channel) : unit =
     try
-      let () = Hashtbl.add dictionary (input_line ic) true in
+      let () = Hashtbl.add dictionary (string_to_word (input_line ic)) true in
       insert_words ic
     with
-    | e -> print_endline (Printexc.to_string e); d in
+    | e -> () in
   let () = insert_words ic in
-  let ai_trie = construct dict_file in
+  let ai_trie = construct filename in
   let player_list = create_player_list num_players num_AI in
-  let gs = {
-              deck = create_random_deck 100;
+  let gs_without_cards = {
+              deck = create_random_deck ();
               discarded = [];
               players = player_list
            }
   in
-  (gs, dictionary, ai_trie)
+  let gs = init_player_cards gs_without_cards (num_players + num_AI)
+  in
+  (gs, ai_trie, dictionary)
 
-let (init_gs, init_dict, init_trie) = init ()
-let _ = turn init_gs init_dict init_trie
+let draw_turn g (tri_d, hash_d) = failwith "TODO"
+
+let rec build_turn g (tri_d, hash_d) =
+  let new_word = print_string "Enter the new word you wish to build: ";
+                           string_to_word (String.uppercase (read_line ())) in
+  let curr_player = List.hd g.players in
+  let hand = curr_player.hand in
+  if is_valid_build hash_d new_word hand then
+    build g new_word
+  else
+    let _ = print_string "That was an invalid choice...let's try that again." in
+    (build_turn g (tri_d, hash_d))
+
+let extend_turn g (tri_d, hash_d) = failwith "TODO"
+
+let steal_turn g (tri_d, hash_d) = failwith "TODO"
+
+let rec human_turn g (tri_d, hash_d) =
+  print_string "\nWould you like to STEAL a word, BUILD a new word,
+                      EXTEND one of your words or DRAW cards?\n";
+  match String.uppercase (read_line()) with
+    | "DRAW" -> draw_turn g (tri_d, hash_d)
+    | "STEAL" -> steal_turn g (tri_d, hash_d)
+    | "BUILD" -> build_turn g (tri_d, hash_d)
+    | "EXTEND" -> extend_turn g (tri_d, hash_d)
+    | _ -> print_string "Invalid input. Try again.\n";
+                                                human_turn g (tri_d, hash_d)
+
+let ai_turn g (tri_d, hash_d) =
+  print_string "The AI is thinking...\n";
+  let new_gs = AI.play_turn g tri_d in
+  print_string "The AI has made its turn.\n\n";
+  new_gs
+
+let rec turn g (tri_d, hash_d) =
+  if is_over g then
+    print_result g
+  else
+    let curr_player = List.hd g.players in
+    Printf.printf "It is now %s's turn.\n\n" curr_player.name;
+    print_string (string_of_game g);
+    let new_gs =
+      if curr_player.is_ai then
+        ai_turn g (tri_d, hash_d)
+      else
+        human_turn g (tri_d, hash_d)
+    in turn new_gs (tri_d, hash_d)
+
+let (init_gs, init_trie, init_dict) = init ()
+let _ = turn init_gs (init_trie, init_dict)

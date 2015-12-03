@@ -1,6 +1,6 @@
 open String
 open Char
-open Score
+open Toolbox
 
 (* Recursive trie data structure definition.
    A node is defined by the character it holds,

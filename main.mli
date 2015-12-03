@@ -1,6 +1,6 @@
 open GameState
 open AI
-open Score
+open Toolbox
 open Trie
 
 (* Simulate the turn of the game. This may involve
@@ -8,9 +8,9 @@ open Trie
    functions, depending on whose move it is. The updated
    game state is returned. This can be thought of as the
    REPL. *)
-val turn : game -> dict -> unit
+val turn : game -> (dict * ((word, bool) Hashtbl.t)) -> unit
 
 (* Initializes the game state and dictionary, after taking inputs for
    game settings (eg. number of AI players, difficulty
    level, etc) *)
-val init : unit -> game * dict
+val init : unit -> (game * dict * ((word, bool) Hashtbl.t))
