@@ -4,8 +4,6 @@ open Score
 
 type steal_tup = string * word * word
 
-let ai_trie = Trie.construct "SixtyK.txt"
-
 (* Return the word with the higher score (return w2 if the scores are equal). *)
 let score_comp (w1: word) (w2: word): word =
   if word_value w1 > word_value w2 then w1 else w2

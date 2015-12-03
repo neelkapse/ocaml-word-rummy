@@ -1,5 +1,6 @@
 open String
 open Char
+open Score
 
 (* Recursive trie data structure definition.
    A node is defined by the character it holds,
@@ -17,14 +18,6 @@ let create () : dict =
    Node (' ', [], "")
 
 (* HELPER FUNCTIONS FOR INSERT *)
-let rec stringToCharList (s : string) : char list =
-  let len = length s in
-  if len = 0 then
-    []
-  else
-    let restOfString = sub s 1 (len-1) in
-    (get s 0)::(stringToCharList restOfString)
-
 let charSortFunction (a : char) (b : char) : int =
   if a > b then 1
   else if a = b then 0
@@ -104,7 +97,7 @@ let rec collectWords (cards: char list) (d : dict) : char list list =
   let nodeWord = getWord d in
   let currentList =
      if nodeWord <> "" then
-      [stringToCharList nodeWord]
+      [string_to_word nodeWord]
      else
       []
   in
@@ -127,7 +120,7 @@ let rec collectWords (cards: char list) (d : dict) : char list list =
    outputs the new dictionary *)
 let insert (dictionary : dict) (word : string) : dict =
    let word = String.lowercase word in
-   let charlist = stringToCharList word in
+   let charlist = string_to_word word in
    let sorted = sortCharList charlist in
 
    let rec explore (word : string) (chars : char list) (d : dict) : dict =
