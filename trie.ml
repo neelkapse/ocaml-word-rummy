@@ -24,29 +24,23 @@ let charSortFunction (a : char) (b : char) : int =
 let sortCharList (lst : char list) : char list =
   List.sort charSortFunction lst
 
-let assignCharToNode (ch : char) (n : node) : node =
-   match n with
-   | Node (_, links, word) -> Node (ch, links, word)
+let assignCharToNode (ch : char) (Node (_, links, word)) : node =
+   Node (ch, links, word)
 
-let assignWordToNode (word : string) (n : node) : node =
-   match n with
-   | Node (ch, links, _) -> Node (ch, links, word)
+let assignWordToNode (word : string) (Node (ch, links, _)) : node =
+   Node (ch, links, word)
 
-let assignLinksToNode (links : node list) (n : node) : node =
-   match n with
-   | Node (ch, _, word) -> Node (ch, links, word)
+let assignLinksToNode (links : node list) (Node (ch, _, word)) : node =
+   Node (ch, links, word)
 
-let getLetter (n : node) : char =
-   match n with
-   | Node (ch, _, _) -> ch
+let getLetter (Node (ch, _, _)) : char =
+   ch
 
-let getLinks (n : node) : node list =
-   match n with
-   | Node (_, links, _) -> links
+let getLinks (Node (_, links, _)) : node list =
+   links
 
-let getWord (n : node) : string =
-   match n with
-   | Node (_, _, word) -> word
+let getWord (Node (_, _, word)) : string =
+   word
 
 let overwrite (d : dict) (subd : node) : dict =
    let subLetter = getLetter subd in
