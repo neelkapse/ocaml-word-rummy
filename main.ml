@@ -122,6 +122,10 @@ let rec turn_minus_intro g d =
     print_string "Invalid input. Try again.\n";
     turn_minus_intro g d
 
+let ai_turn_minus_intro g d =
+  print_string "The AI is thinking...\n";
+  turn (play_turn g) d
+
 let turn g d =
   if is_over g then
     print_final_results g
@@ -130,7 +134,10 @@ let turn g d =
     let curr_player = List.hd g.players in
     Printf.printf "It is now %s's turn.\n\n" curr_player.name;
     let _ = print_string (string_of_game g_after_draw) in
-    turn_minus_intro g_after_draw d
+    if curr_player.is_ai then
+      ai_turn_minus_intro g d
+    else
+      turn_minus_intro g_after_draw d
 
 
 
