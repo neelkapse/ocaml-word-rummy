@@ -6,9 +6,7 @@ open Score
    A node is defined by the character it holds,
    the word it holds, and the list of nodes it
    is the parent of. *)
-type node =
-   | Sentinel
-   | Node of char * (node list) * string
+type node = Node of char * (node list) * string
 
 (* A dictionary can be defined by its root node *)
 type dict = node
@@ -26,35 +24,23 @@ let charSortFunction (a : char) (b : char) : int =
 let sortCharList (lst : char list) : char list =
   List.sort charSortFunction lst
 
-let assignCharToNode (ch : char) (n : node) : node =
-   match n with
-   | Sentinel -> failwith "Cannot assign character to Sentinel Node"
-   | Node (_, links, word) -> Node (ch, links, word)
+let assignCharToNode (ch : char) (Node (_, links, word)) : node =
+   Node (ch, links, word)
 
-let assignWordToNode (word : string) (n : node) : node =
-   match n with
-   | Sentinel -> failwith "Cannot assign word to Sentinel Node"
-   | Node (ch, links, _) -> Node (ch, links, word)
+let assignWordToNode (word : string) (Node (ch, links, _)) : node =
+   Node (ch, links, word)
 
-let assignLinksToNode (links : node list) (n : node) : node =
-   match n with
-   | Sentinel -> failwith "Cannot assign links to Sentinel Node"
-   | Node (ch, _, word) -> Node (ch, links, word)
+let assignLinksToNode (links : node list) (Node (ch, _, word)) : node =
+   Node (ch, links, word)
 
-let getLetter (n : node) : char =
-   match n with
-   | Sentinel -> failwith "Cannot get letter from Sentinel Node"
-   | Node (ch, _, _) -> ch
+let getLetter (Node (ch, _, _)) : char =
+   ch
 
-let getLinks (n : node) : node list =
-   match n with
-   | Sentinel -> failwith "Cannot get links from Sentinel Node"
-   | Node (_, links, _) -> links
+let getLinks (Node (_, links, _)) : node list =
+   links
 
-let getWord (n : node) : string =
-   match n with
-   | Sentinel -> failwith "Cannot get word from Sentinel Node"
-   | Node (_, _, word) -> word
+let getWord (Node (_, _, word)) : string =
+   word
 
 let overwrite (d : dict) (subd : node) : dict =
    let subLetter = getLetter subd in

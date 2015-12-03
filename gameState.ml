@@ -26,6 +26,13 @@ let rec get_cards (deck: card list) (i: int) : (card list * card list) =
     let (sub_hand, sub_deck) = get_cards t (i-1) in
     (h::sub_hand, sub_deck)
 
+let rec replenish_hand g =
+  let num_cards = List.length (List.hd g.players).hand in
+  if (num_cards < 7) then
+    replenish_hand (draw_card g)
+  else
+    g
+
 (* PUBLIC METHODS *)
 
 let is_over g =
@@ -52,12 +59,12 @@ let steal game name w1 w2 =
   | p::players_t ->
     let p' = {p with words = w2 :: p.words} in
     let players' = steal_from_player (p'::players_t) in
-    {game with players = players'}
+    {game with players = players'} |> replenish_hand |> rotate
 
 let extend game w1 w2 =
   match game.players with
   | [] -> failwith "no_players"
-  | p::_ -> steal game (p.name) w1 w2
+  | p::_ -> (steal game (p.name) w1 w2)
 
 let build game word =
   let rec remove_word hand w: card list =
@@ -72,7 +79,7 @@ let build game word =
     let words' = word :: p.words in
     let p' = {p with hand = hand'; words = words'} in
     let players' = p' :: players_t in
-    {game with deck = deck'; players = players'}
+    {game with deck = deck'; players = players'} |> replenish_hand |> rotate
 
 let draw_card game =
   match (game.deck, game.players) with
@@ -83,6 +90,7 @@ let draw_card game =
     let players' = p' :: players_t in
     {game with deck = d'; players = players'}
 
+(* Warning: rotates list *)
 let discard_card game card =
   match game.players with
   | [] -> failwith "no_players"
@@ -90,7 +98,7 @@ let discard_card game card =
     let discarded' = card :: game.discarded in
     let p' = {p with hand = (remove_element p.hand card)} in
     let players' = p' :: players_t in
-    {game with discarded = discarded'; players = players'}
+    {game with discarded = discarded'; players = players'} |> rotate
 
 let string_of_game g =
   let rec string_of_player_list ps =
