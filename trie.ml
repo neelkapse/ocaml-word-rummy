@@ -105,7 +105,7 @@ let rec collectWords (cards: char list) (d : dict) : char list list =
 (* Inserts a given word into a dictionary, and
    outputs the new dictionary *)
 let insert (dictionary : dict) (word : string) : dict =
-   let word = String.lowercase word in
+   let word = String.uppercase word in
    let charlist = string_to_word word in
    let sorted = sortCharList charlist in
 
@@ -139,5 +139,5 @@ let construct (filename : string) : dict =
    dictionary will be returned. *)
 let rec get_words (dictionary : dict) (cards : char list) : char list list =
   let cards = sortCharList cards in
-  let cards = List.map lowercase cards in
+  let cards = List.map uppercase cards in
   collectWords cards dictionary
