@@ -36,6 +36,7 @@ let string_to_word s =
   strip [] (len - 1)
 
 let create_random_deck () =
+  Random.self_init ();
   let letters = ['a';'a';'a';'a';'a';'a';'a';'a';'a';'b';'b';'c';'c';
                  'd';'d';'d';'d';'e';'e';'e';'e';'e';'e';'e';'e';'e';
                  'e';'e';'e';'f';'f';'g';'g';'g';'h';'h';'i';'i';'i';
@@ -120,8 +121,8 @@ let extend_turn g (tri_d, hash_d) = failwith "TODO"
 let steal_turn g (tri_d, hash_d) = failwith "TODO"
 
 let rec human_turn g (tri_d, hash_d) =
-  print_string "\nWould you like to STEAL a word, BUILD a new word,
-                      EXTEND one of your words or DRAW cards?\n";
+  print_string ("\nWould you like to STEAL a word, BUILD a new word," ^
+    " EXTEND one of your words or DRAW cards?\n");
   match String.uppercase (read_line()) with
     | "DRAW" -> draw_turn g (tri_d, hash_d)
     | "STEAL" -> steal_turn g (tri_d, hash_d)
