@@ -148,14 +148,15 @@ let rec steal_turn g (tri_d, hash_d) =
   let finder = fun x -> (x.name = name) in
   if List.exists finder g.players then
     let curr_player = List.find finder g.players in
+    let this_player = List.hd g.players in
     let curr_word_list = curr_player.words in
     print_string "Enter the word you wish to steal: ";
     let old_word = string_to_word (String.uppercase (read_line ())) in
     print_string "Enter the new word you wish to form: ";
     let new_word = string_to_word (String.uppercase (read_line ())) in
     if (List.mem old_word curr_word_list) &&
-            (is_valid_construct hash_d old_word new_word curr_player.hand) then
-      steal g name old_word new_word
+            (is_valid_construct hash_d old_word new_word this_player.hand) then
+      steal g curr_player.name old_word new_word
     else
       let _ = print_string "That was an invalid choice...let's try that again." in
       steal_turn g (tri_d, hash_d)
