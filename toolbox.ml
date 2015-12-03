@@ -38,29 +38,17 @@ let string_to_word s =
   let len = String.length s in
   let rec strip w i =
     if i = -1 then w
-    else strip ((get s i)::w) (i - 1) in
+    else strip ((String.get s i)::w) (i - 1) in
   strip [] (len - 1)
 
+let word_to_string w =
+  let len = List.length w in
+  String.init len (fun i -> List.nth w i)
+
 let is_valid_word d w =
-  
+  Hashtbl.mem d w
 
-let is_valid_construct (steal_word: word) (gen_word: word): bool =
-  (* If w contains card c, return w without card c. Otherwise, return an empty
-   * list. *)
-  let remove_char w c =
-    let rec remove nw ow =
-      match ow with
-      | h::t -> if h = c then List.rev_append nw t
-                else remove (h::nw) t
-      | []   -> [] in
-    remove [] w in
-  (* If [] then either gen_word does not contain a card from steal_word or
-   * gen_word is the same length as steal_word. *)
-  match List.fold_left remove_char gen_word steal_word with
-  | [] -> false
-  | _  -> true
-
-let is_valid_construct (steal_word: word) (gen_word: word): bool =
+let is_sub_word (sub_word: word) (super_word: word): bool =
   (* Increments the value in arr at the index corresponding to card c. *)
   let inc arr c =
     let i = Char.code c - 65 in
@@ -74,9 +62,19 @@ let is_valid_construct (steal_word: word) (gen_word: word): bool =
       else if arr1.(c) > arr2.(c) then false
       else comp (c + 1) in
     comp 0 in
-  if List.length steal_word < List.length gen_word then
-    let (steal_count, gen_count) = (Array.make 26 0, Array.make 26 0) in
-    let (inc_steal, inc_gen) = (inc steal_count, inc gen_count) in
-    let _ = (List.iter inc_steal steal_word, List.iter inc_gen gen_word) in
-    comp_arr steal_count gen_count 26
-  else false
+  let (sub_count, super_count) = (Array.make 26 0, Array.make 26 0) in
+  let (inc_steal, inc_gen) = (inc sub_count, inc super_count) in
+  let _ = (List.iter inc_steal sub_word, List.iter inc_gen super_word) in
+  comp_arr sub_count super_count 26
+
+let is_valid_construct_ai steal_word gen_word =
+  (List.length steal_word < List.length gen_word) &&
+  is_sub_word steal_word gen_word
+
+let is_valid_build dict build_word hand =
+  is_valid_word dict build_word && is_sub_word build_word hand
+
+let is_valid_construct dict steal_word gen_word hand =
+  is_valid_word dict gen_word &&
+  is_sub_word gen_word (steal_word@hand) &&
+  is_valid_construct_ai steal_word gen_word
