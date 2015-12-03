@@ -16,34 +16,40 @@ let score_comp_pair (t1: steal_tup) (t2: steal_tup): steal_tup =
 
 (* Return Some wd where wd is the best word that can be made from w and letters
  * if any word can be made. Return None if no word can be made. *)
-let best_word (letters: card list) (w: word): word option =
-  let gen_words = Trie.get_words ai_trie (List.rev_append letters w) in
-  let is_valid_word = contains_word w in
+let best_word (t: Trie.dict) (letters: card list) (w: word): word option =
+  let gen_words = Trie.get_words t (List.rev_append letters w) in
+  let is_valid_word = is_valid_construct_ai w in
   match List.filter is_valid_word gen_words with
   | h::t -> Some (List.fold_left score_comp h t)
   | []   -> None
 
-let best_word_build (letters: card list): word option = best_word [] letters
+let best_word_build (t: Trie.dict) (letters: card list): word option =
+  best_word t [] letters
 
 let play_steal (g: game) (p: player) ((n, w, bw): steal_tup): game =
-  if p.name = n then extend g w bw
-  else steal g n w bw
+  if p.name = n then rotate (extend g w bw)
+  else rotate (steal g n w bw)
 
-let play_no_steal (g: game) (p: player): game =
-  match best_word_build p.hand with
-  | Some w -> build g w
+let play_no_steal (g: game) (p: player) (t: Trie.dict): game =
+  match best_word_build t p.hand with
+  | Some w -> rotate (build g w)
   | None   ->
     let g1 = draw_card g in
     match g1.players with
-    | p1::_ -> discard_card g (List.nth p1.hand (List.length p1.hand - 1))
-    | []    -> assert false
+    | p1::_ ->
+      let c = (List.nth p1.hand (List.length p1.hand - 1)) in
+      rotate (discard_card g c)
+    | []    -> failwith "no_players"
 
-let play_turn (g: game) (p: player): game =
+let play_turn g t =
   (* For each word in pl.words, create a tuple containing pl.name, the best word
    * that can be generated from the word, and the word itself and then cons this
    * tuple to lst. *)
+  let p = match g.players with
+          | h::_ -> h
+          | []   -> failwith "no_players" in
   let flatten_words lst pl =
-    let remap l w = (pl.name, w, best_word p.hand w)::l in
+    let remap l w = (pl.name, w, best_word t p.hand w)::l in
     List.fold_left remap lst pl.words in
   (* If bword is Some bw, then generate the tuple (name, w, bw) and return the
    * tuple cons l. Otherwise, return l. *)
@@ -56,4 +62,4 @@ let play_turn (g: game) (p: player): game =
     |> List.fold_left opt_filter [] in
   match steal_word_list with
   | h::t -> play_steal g p (List.fold_left score_comp_pair h t)
-  | []   -> play_no_steal g p
+  | []   -> play_no_steal g p t

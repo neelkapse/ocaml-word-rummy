@@ -26,13 +26,6 @@ let rec get_cards (deck: card list) (i: int) : (card list * card list) =
     let (sub_hand, sub_deck) = get_cards t (i-1) in
     (h::sub_hand, sub_deck)
 
-let rec replenish_hand g =
-  let num_cards = List.length (List.hd g.players).hand in
-  if (num_cards < 7) then
-    replenish_hand (draw_card g)
-  else
-    g
-
 (* PUBLIC METHODS *)
 
 let is_over g =
@@ -44,6 +37,22 @@ let rotate g =
   match g.players with
   | [] -> failwith "no_players"
   | h::t -> {g with players = t@[h]}
+
+let draw_card game =
+  match (game.deck, game.players) with
+  | ([], _) -> failwith "deck_is_empty"
+  | (_, []) -> failwith "no_players"
+  | (card::d', p::players_t) ->
+    let p' =  {p with hand = card :: (p.hand)} in
+    let players' = p' :: players_t in
+    {game with deck = d'; players = players'}
+
+let rec replenish_hand g =
+  let num_cards = List.length (List.hd g.players).hand in
+  if (num_cards < 7) then
+    replenish_hand (draw_card g)
+  else
+    g
 
 let steal game name w1 w2 =
   let rec steal_from_player ps =
@@ -81,15 +90,6 @@ let build game word =
     let players' = p' :: players_t in
     {game with deck = deck'; players = players'} |> replenish_hand |> rotate
 
-let draw_card game =
-  match (game.deck, game.players) with
-  | ([], _) -> failwith "deck_is_empty"
-  | (_, []) -> failwith "no_players"
-  | (card::d', p::players_t) ->
-    let p' =  {p with hand = card :: (p.hand)} in
-    let players' = p' :: players_t in
-    {game with deck = d'; players = players'}
-
 (* Warning: rotates list *)
 let discard_card game card =
   match game.players with
@@ -108,4 +108,4 @@ let string_of_game g =
   match g.players with
   | [] -> failwith "no_players"
   | p::_ -> 
-    "TURN:\n\t" ^ p.name ^ "\nPLAYERS:\n\t" ^ string_of_player_list (g.players)
+    "TURN:\n\t" ^ p.name ^ "\nPLAYERS:\n\t" ^ string_of_player_list (g.players) ^ "\n" ^ string_of_hand p
