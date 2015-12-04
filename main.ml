@@ -115,6 +115,7 @@ let rec input_dictionary () =
          input_dictionary ()
 
 let init () =
+  print_string "\n";
   let num_players = input_num_humans () in
   let num_AI = input_num_ai num_players in
   let filename = input_dictionary () in
@@ -183,7 +184,7 @@ let rec extend_turn g (tri_d, hash_d) =
     extend_turn g (tri_d, hash_d)
 
 let rec steal_turn g (tri_d, hash_d) =
-  print_string ("Enter the name of the player you wish to steal from " ^
+  print_string ("Enter the name of the player you wish to steal\nfrom " ^
                                         "(capitalization and spacing MATTERS): ");
   let name = read_line () in
   let finder = fun x -> (x.name = name) in
@@ -206,8 +207,8 @@ let rec steal_turn g (tri_d, hash_d) =
     steal_turn g (tri_d, hash_d)
 
 let rec human_turn g (tri_d, hash_d) =
-  print_string ("\nWould you like to STEAL a word, BUILD a new word," ^
-    " EXTEND one of your words or DRAW cards?\n");
+  print_string ("\nWould you like to STEAL a word, BUILD a new word,\n" ^
+    "EXTEND one of your words or DRAW cards?\n> ");
   match String.uppercase (read_line()) with
     | "DRAW" -> draw_turn g (tri_d, hash_d)
     | "STEAL" -> steal_turn g (tri_d, hash_d)
@@ -226,7 +227,7 @@ let rec turn g (tri_d, hash_d) =
     print_result g
   else
     let curr_player = List.hd g.players in
-    print_string "--------------------------------------------------------\n";
+    print_string "\n______________________________________________________\n\n";
     Printf.printf "It is now %s's turn.\n\n" curr_player.name;
     print_string (string_of_game g);
     let new_gs =
