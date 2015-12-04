@@ -2,7 +2,8 @@ type card = char
 type word = card list
 exception No_Such_Card
 
-let card_value c =
+(* Returns the point value for a specific card  *)
+let card_value (c: card): int =
   match c with
   | 'A' -> 1
   | 'B' -> 3
@@ -45,9 +46,11 @@ let word_to_string w =
   let len = List.length w in
   String.init len (fun i -> List.nth w i)
 
-let is_valid_word d w =
+(* [is_valid_word d w] returns true if [w] is in set [d] *)
+let is_valid_word (d: (card list, bool) Hashtbl.t) (w: word): bool =
   Hashtbl.mem d w
 
+(* [is_sub_word w1 w2] returns true if [w1] can be constructed from [w2] *)
 let is_sub_word (sub_word: word) (super_word: word): bool =
   (* Increments the value in arr at the index corresponding to card c. *)
   let inc arr c =
@@ -72,9 +75,9 @@ let is_valid_construct_ai steal_word gen_word =
   is_sub_word steal_word gen_word
 
 let is_valid_build dict build_word hand =
-  is_valid_word dict build_word && is_sub_word build_word hand
+  (is_valid_word dict build_word, is_sub_word build_word hand)
 
 let is_valid_construct dict steal_word gen_word hand =
-  is_valid_word dict gen_word &&
-  is_sub_word gen_word (steal_word@hand) &&
-  is_valid_construct_ai steal_word gen_word
+  (is_valid_word dict gen_word,
+   is_sub_word gen_word (steal_word@hand),
+   is_valid_construct_ai steal_word gen_word)
