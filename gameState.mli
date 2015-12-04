@@ -21,6 +21,7 @@ val is_over : game -> bool
 val rotate : game -> game
 val replenish_hand : game -> game
 
+
 (* Perform word building operations *)
 val extend : game -> word -> word -> game
 val steal : game -> string -> word -> word -> game
