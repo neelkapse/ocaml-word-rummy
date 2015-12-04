@@ -115,7 +115,10 @@ let rec input_dictionary () =
          input_dictionary ()
 
 let init () =
-  print_string "\nWelcome to OCaml World Rummy v1.2\n\n";
+  print_string "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
+  print_string "Welcome to OCaml World Rummy v1.2\n\n";
+  print_string ("NOTE: To abort a build, steal, or extend, enter a period as " ^
+                                                        "the first input!\n\n");
   let num_players = input_num_humans () in
   let num_AI = input_num_ai num_players in
   let filename = input_dictionary () in
@@ -161,81 +164,90 @@ let draw_turn g (tri_d, hash_d) =
 let rec build_turn g (tri_d, hash_d) =
   let new_word = print_string "Enter the new word you wish to build: ";
                            string_to_word (String.uppercase (read_line ())) in
-  let curr_player = List.hd g.players in
-  let hand = curr_player.hand in
-  match is_valid_build hash_d new_word hand with
-    | (true, true) -> build g new_word
-    | (false, _) -> let _ = print_string ("That's not a valid word.\nLet's try"
-                              ^ "again...\n") in (build_turn g (tri_d, hash_d))
-    | _ -> let _ = print_string ("Insufficient cards in hand.\nLet's try" ^
-                      "again...\n") in (build_turn g (tri_d, hash_d))
+  if new_word = ['.'] then
+    g
+  else
+    let curr_player = List.hd g.players in
+    let hand = curr_player.hand in
+    match is_valid_build hash_d new_word hand with
+      | (true, true) -> build g new_word
+      | (false, _) -> let _ = print_string ("That's not a valid word.\nTry "
+                                ^ "again...\n") in (build_turn g (tri_d, hash_d))
+      | _ -> let _ = print_string ("Insufficient cards in hand.\nTry " ^
+                        "again...\n") in (build_turn g (tri_d, hash_d))
 
 let rec extend_turn g (tri_d, hash_d) =
   let curr_player = List.hd g.players in
   let curr_word_list = curr_player.words in
   print_string "Enter the word of yours you wish to extend: ";
   let old_word = string_to_word (String.uppercase (read_line ())) in
-  print_string "Enter the new word you wish to form: ";
-  let new_word = string_to_word (String.uppercase (read_line ())) in
-  let old_word_exists = List.mem old_word curr_word_list in
-  let (v1,v2,v3) = is_valid_construct hash_d old_word new_word curr_player.hand in
-  match (old_word_exists, v1, v2, v3) with
-    | (true, true, true, true) -> extend g old_word new_word
-    | (false, _, _, _) -> let _ = print_string ("The word you're trying to" ^
-                    " extend is not one of your words.\nLet's try again.\n") in
-                                                  extend_turn g (tri_d, hash_d)
-    | (_, false, _, _) -> let _ = print_string ("The word you're trying to" ^
-                                     " make is invalid.\nLet's try again.\n") in
-                                                  extend_turn g (tri_d, hash_d)
-    | (_, _, false, _) -> let _ = print_string ("The new word cannot be built " ^
-                     "from the old word and your cards.\nLet's try again.\n") in
-                                                  extend_turn g (tri_d, hash_d)
-    | _ -> let _ = print_string ("The new word you want to create must" ^
-          "contain all letters within the original word\nLet's try again.\n") in
-                                                  extend_turn g (tri_d, hash_d)
+  if old_word = ['.'] then
+    g
+  else
+    let _ = print_string "Enter the new word you wish to form: " in
+    let new_word = string_to_word (String.uppercase (read_line ())) in
+    let old_word_exists = List.mem old_word curr_word_list in
+    let (v1,v2,v3) = is_valid_construct hash_d old_word new_word curr_player.hand in
+    match (old_word_exists, v1, v2, v3) with
+      | (true, true, true, true) -> extend g old_word new_word
+      | (false, _, _, _) -> let _ = print_string ("The word you're trying to" ^
+                      " extend is not one of your words.\nTry again.\n") in
+                                                    extend_turn g (tri_d, hash_d)
+      | (_, false, _, _) -> let _ = print_string ("The word you're trying to" ^
+                                       " make is invalid.\nTry again.\n") in
+                                                    extend_turn g (tri_d, hash_d)
+      | (_, _, false, _) -> let _ = print_string ("The new word cannot be built " ^
+                       "from the old word and your cards.\nTry again.\n") in
+                                                    extend_turn g (tri_d, hash_d)
+      | _ -> let _ = print_string ("The new word you want to create must" ^
+            "contain all letters within the original word\nTry again.\n") in
+                                                    extend_turn g (tri_d, hash_d)
 
 
 let rec steal_turn g (tri_d, hash_d) =
   print_string ("Enter the name of the player you wish to steal\nfrom " ^
                                       "(capitalization and spacing MATTERS): ");
   let name = read_line () in
-  let finder = fun x -> (x.name = name) in
-  if List.exists finder g.players then
-    let curr_player = List.find finder g.players in
-    let this_player = List.hd g.players in
-    let curr_word_list = curr_player.words in
-    print_string "Enter the word you wish to steal: ";
-    let old_word = string_to_word (String.uppercase (read_line ())) in
-    print_string "Enter the new word you wish to form: ";
-    let new_word = string_to_word (String.uppercase (read_line ())) in
-    let old_word_exists = List.mem old_word curr_word_list in
-    let (v1,v2,v3) = is_valid_construct hash_d old_word new_word this_player.hand in
-    match (old_word_exists, v1, v2, v3) with
-    | (true, true, true, true) -> steal g curr_player.name old_word new_word
-    | (false, _, _, _) -> let _ = print_string ("The word you're trying to" ^
-                                " steal does not exist!\nLet's try again.\n") in
-                                                    steal_turn g (tri_d, hash_d)
-    | (_, false, _, _) -> let _ = print_string ("The word you're trying to" ^
-                                     " make is invalid.\nLet's try again.\n") in
-                                                    steal_turn g (tri_d, hash_d)
-    | (_, _, false, _) -> let _ = print_string ("The new word cannot be built " ^
-                     "from the old word and your cards.\nLet's try again.\n") in
-                                                    steal_turn g (tri_d, hash_d)
-    | _ -> let _ = print_string ("The new word you want to create must" ^
-          "contain all letters within the original word\nLet's try again.\n") in
-                                                    steal_turn g (tri_d, hash_d)
+  if name = "." then
+    g
   else
-    let _ = print_string "That player does not exist! Try again.\n" in
-    steal_turn g (tri_d, hash_d)
+    let finder = fun x -> (x.name = name) in
+    if List.exists finder g.players then
+      let curr_player = List.find finder g.players in
+      let this_player = List.hd g.players in
+      let curr_word_list = curr_player.words in
+      print_string "Enter the word you wish to steal: ";
+      let old_word = string_to_word (String.uppercase (read_line ())) in
+      print_string "Enter the new word you wish to form: ";
+      let new_word = string_to_word (String.uppercase (read_line ())) in
+      let old_word_exists = List.mem old_word curr_word_list in
+      let (v1,v2,v3) = is_valid_construct hash_d old_word new_word this_player.hand in
+      match (old_word_exists, v1, v2, v3) with
+      | (true, true, true, true) -> steal g curr_player.name old_word new_word
+      | (false, _, _, _) -> let _ = print_string ("The word you're trying to" ^
+                                  " steal does not exist!\nTry again.\n") in
+                                                      steal_turn g (tri_d, hash_d)
+      | (_, false, _, _) -> let _ = print_string ("The word you're trying to" ^
+                                       " make is invalid.\nTry again.\n") in
+                                                      steal_turn g (tri_d, hash_d)
+      | (_, _, false, _) -> let _ = print_string ("The new word cannot be built " ^
+                       "from the old word and your cards.\nTry again.\n") in
+                                                      steal_turn g (tri_d, hash_d)
+      | _ -> let _ = print_string ("The new word you want to create must" ^
+            "contain all letters within the original word\nTry again.\n") in
+                                                      steal_turn g (tri_d, hash_d)
+    else
+      let _ = print_string "That player does not exist! Try again.\n" in
+      steal_turn g (tri_d, hash_d)
 
 let rec human_turn g (tri_d, hash_d) =
   print_string ("\nTo steal a word, enter S.\nTo build a word, enter B.\n" ^
-    "To extend one of your words, enter E. To draw a card, enter D.\n> ");
-  match String.uppercase (read_line()) with
-    | "D" -> draw_turn g (tri_d, hash_d)
-    | "S" -> steal_turn g (tri_d, hash_d)
-    | "B" -> build_turn g (tri_d, hash_d)
-    | "E" -> extend_turn g (tri_d, hash_d)
+    "To extend one of your words, enter E.\nTo draw a card, enter D.\n> ");
+  match String.get (String.uppercase (read_line())) 0 with
+    | 'D' -> draw_turn g (tri_d, hash_d)
+    | 'S' -> steal_turn g (tri_d, hash_d)
+    | 'B' -> build_turn g (tri_d, hash_d)
+    | 'E' -> extend_turn g (tri_d, hash_d)
     | _ -> print_string "Invalid input. Try again.\n"; human_turn g (tri_d, hash_d)
 
 let ai_turn g (tri_d, hash_d) =
