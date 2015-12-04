@@ -238,8 +238,84 @@ let rec extend_turn g (tri_d, hash_d) =
             "contain all letters within the original word\nTry again.\n") in
                                                   extend_turn g (tri_d, hash_d)
 
+let rec print_candidates candidates counter =
+  match candidates with
+  | [] -> ()
+  | h::t -> print_string ((string_of_int counter) ^ ")\t" ^ h.name ^ "\n");
+            print_candidates t (counter + 1)
+
+let rec resolve_steal_conflict candidates =
+  print_string (string_of_int (List.length candidates) ^ " players have that " ^
+                "word on the board. Which one would you like to steal from?\n");
+  print_candidates candidates 1;
+  print_string ("Enter the number corresponding to the player you'd like to steal from.\n");
+  print_string ("> ");
+  try
+    let input = int_of_string (read_line ()) in
+    if (input < 1 || input > (List.length candidates)) then
+      let () = print_string "That's an invalid number, try again!" in
+      resolve_steal_conflict candidates
+    else
+      let rec get_nth lst n =
+        match lst with
+        | [] -> failwith "Not possible"
+        | h::t -> (if n = 0 then
+                    h
+                   else
+                    get_nth t (n - 1))
+      in get_nth candidates (input - 1)
+  with
+  | _ -> print_string "That's an invalid number, try again!";
+         resolve_steal_conflict candidates
 
 let rec steal_turn g (tri_d, hash_d) =
+  print_string ("Which word would you like to steal?\n> ");
+  let word = String.uppercase (read_line ()) in
+  if word = "." then
+    g
+  else
+    let old_word = string_to_word word in
+    let word_finder = fun x -> (x = old_word) in
+    let player_finder = fun x -> (List.exists word_finder x.words) in
+    let other_players =
+      match g.players with
+      | [] -> failwith "no_players"
+      | h::t -> t
+    in
+    let candidates = List.filter player_finder other_players in
+    match candidates with
+    | [] -> print_string ("That word isn't on the board, try again!\n");
+            steal_turn g (tri_d, hash_d)
+    | h::t -> (let victim =
+                if List.length t = 0 then
+                  h
+                else
+                  resolve_steal_conflict candidates
+              in
+    print_string ("Which word would you like to form?\n> ");
+    let word = String.uppercase (read_line ()) in
+    let new_word = string_to_word word in
+    let my_hand =
+      let first_player =
+        match g.players with
+        | [] -> failwith "no_players"
+        | h::t -> h
+      in first_player.hand
+    in
+    let (v1,v2,v3) = is_valid_construct hash_d old_word new_word my_hand in
+      match (v1, v2, v3) with
+      | (true,true,true) -> steal g victim.name old_word new_word
+      | (false,_,_) -> let _ = print_string ("The word you're trying to" ^
+                                       " make is invalid.\nTry again.\n") in
+                                                    steal_turn g (tri_d, hash_d)
+      | (_,false,_) -> let _ = print_string ("The new word cannot be built " ^
+                       "from the old word and your cards.\nTry again.\n") in
+                                                    steal_turn g (tri_d, hash_d)
+      | _ -> let _ = print_string ("The new word you want to create must" ^
+            "contain all letters within the original word\nTry again.\n") in
+                                                    steal_turn g (tri_d, hash_d))
+
+(*let rec steal_turn g (tri_d, hash_d) =
   print_string ("Enter the name of the player you wish to steal from " ^
                                       "(spaces matter!): ");
   let name = String.uppercase (read_line ()) in
@@ -274,18 +350,23 @@ let rec steal_turn g (tri_d, hash_d) =
                                                     steal_turn g (tri_d, hash_d)
     else
       let _ = print_string "That player does not exist! Try again.\n" in
-      steal_turn g (tri_d, hash_d)
+      steal_turn g (tri_d, hash_d)*)
 
 let rec human_turn g (tri_d, hash_d) =
   print_string ("\nTo steal a word, enter S.\nTo build a word, enter B.\n" ^
     "To extend one of your words, enter E.\nTo draw a card, enter D.\n> ");
-  match String.get (String.uppercase (read_line())) 0 with
-    | 'D' -> draw_turn g (tri_d, hash_d)
-    | 'S' -> steal_turn g (tri_d, hash_d)
-    | 'B' -> build_turn g (tri_d, hash_d)
-    | 'E' -> extend_turn g (tri_d, hash_d)
-    | _ -> print_string "Invalid input. Try again.\n";
-                                                    human_turn g (tri_d, hash_d)
+  let input = String.uppercase (read_line ()) in
+  if String.length input = 0 then
+    let () = print_string "Invalid input, try again!\n" in
+    human_turn g (tri_d, hash_d)
+  else
+    match String.get input 0 with
+      | 'D' -> draw_turn g (tri_d, hash_d)
+      | 'S' -> steal_turn g (tri_d, hash_d)
+      | 'B' -> build_turn g (tri_d, hash_d)
+      | 'E' -> extend_turn g (tri_d, hash_d)
+      | _ -> print_string "Invalid input, try again!\n";
+                                                      human_turn g (tri_d, hash_d)
 
 let ai_turn g (tri_d, hash_d) =
   print_string "The AI is thinking...\n";
