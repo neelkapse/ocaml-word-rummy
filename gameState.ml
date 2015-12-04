@@ -111,4 +111,4 @@ let string_of_game g =
   match g.players with
   | [] -> failwith "no_players"
   | p::_ -> 
-    "TURN:\n\t" ^ p.name ^ "\nPLAYERS:\n" ^ string_of_player_list (g.players) ^ "\nCURRENT TURN:\n\t" ^ string_of_hand p ^ "\n"
+    "\nBOARD:\n" ^ string_of_player_list (g.players) ^ "\n--------------------------------------------------------\n" ^ "\nHAND:\t" ^ string_of_hand p ^ "\n________________________________________________________\n"
