@@ -26,6 +26,11 @@ let rec get_cards (deck: card list) (i: int) : (card list * card list) =
     let (sub_hand, sub_deck) = get_cards t (i-1) in
     (h::sub_hand, sub_deck)
 
+let rec remove_word hand w: card list =
+    match w with
+    | [] -> hand
+    | h::t -> remove_word (remove_element hand h) t
+
 (* PUBLIC METHODS *)
 
 let is_over g =
@@ -66,9 +71,11 @@ let steal game name w1 w2 =
   match game.players with
   | [] -> failwith "no_players"
   | p::players_t ->
-    let p' = {p with words = w2 :: p.words} in
+    let (new_cards, deck') = get_cards (game.deck) (List.length w2 - List.length w1) in
+    let hand' = new_cards @ (remove_word (p.hand @ w1) w2) in
+    let p' = {p with hand = hand'; words = w2 :: p.words} in
     let players' = steal_from_player (p'::players_t) in
-    {game with players = players'} |> replenish_hand |> rotate
+    {game with players = players'} |> rotate
 
 let extend game w1 w2 =
   match game.players with
@@ -76,10 +83,6 @@ let extend game w1 w2 =
   | p::_ -> (steal game (p.name) w1 w2)
 
 let build game word =
-  let rec remove_word hand w: card list =
-    match w with
-    | [] -> []
-    | h::t -> remove_word (remove_element hand h) t in
   match game.players with
   | [] -> failwith "no_players"
   | p::players_t ->
@@ -88,7 +91,7 @@ let build game word =
     let words' = word :: p.words in
     let p' = {p with hand = hand'; words = words'} in
     let players' = p' :: players_t in
-    {game with deck = deck'; players = players'} |> replenish_hand |> rotate
+    {game with deck = deck'; players = players'} |> rotate
 
 (* Warning: rotates list *)
 let discard_card game card =
