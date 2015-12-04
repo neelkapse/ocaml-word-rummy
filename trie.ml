@@ -128,7 +128,7 @@ let construct (filename : string) : dict =
       let word = input_line ic in
       insertWords ic (insert d word)
     with
-    | e -> print_endline (Printexc.to_string e); d
+    | e -> d
   in insertWords ic d
 
 (* Given a set of characters, this function will

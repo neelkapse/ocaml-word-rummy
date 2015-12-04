@@ -70,13 +70,54 @@ let create_player_list num_p num_ai =
   in
   create num_p num_ai []
 
+let rec input_num_humans () =
+  let () = print_string "Enter the number of human players: " in
+  try
+    let num_players = int_of_string (read_line()) in
+    if num_players >= 0 then
+      num_players
+    else
+      let () = print_string
+                  "Number of human players cannot be negative, try again!\n" in
+      input_num_humans ()
+  with
+  | _ -> let () = print_string
+                    "Number of human players must be a number, try again!\n" in
+         input_num_humans ()
+
+let rec input_num_ai num_players =
+  let () = print_string "Enter the number of CPU players: " in
+  try
+    let num_ai = int_of_string (read_line()) in
+    if num_ai > 0 || (num_ai = 0 && num_players > 0) then
+      num_ai
+    else if num_ai = 0 && num_players = 0 then
+      let () = print_string
+                "Total number of players cannot be zero, try again!\n" in
+      input_num_ai num_players
+    else
+      let () = print_string
+                  "Number of CPU players cannot be negative, try again!\n" in
+      input_num_ai num_players
+  with
+  | _ -> let () = print_string
+                    "Number of CPU players must be a number, try again!\n" in
+         input_num_ai num_players
+
+let rec input_dictionary () =
+  let () = print_string "Enter the file name of your dictionary: " in
+  let filename = read_line() in
+  try
+    let _ = open_in filename in
+    filename
+  with
+  | _ -> let () = print_string "That file wasn't found, try again!\n" in
+         input_dictionary ()
+
 let init () =
-  print_string "Enter the number of human players: ";
-  let num_players = int_of_string (read_line ()) in
-  print_string "Enter the number of cpu players: ";
-  let num_AI = int_of_string (read_line ()) in
-  print_string "Enter the file name of your dictionary: ";
-  let filename = read_line () in
+  let num_players = input_num_humans () in
+  let num_AI = input_num_ai num_players in
+  let filename = input_dictionary () in
   let dictionary = Hashtbl.create 80_000 in
   let ic = open_in filename in
   let rec insert_words (ic : in_channel) : unit =
