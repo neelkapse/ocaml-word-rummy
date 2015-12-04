@@ -30,7 +30,6 @@ let print_result g =
       (fold_left (fun acc x -> acc ^ ", " ^ x.name) h.name t)
 
 let create_random_deck () =
-  Random.self_init ();
   let letters_l = ['a';'a';'a';'a';'a';'a';'a';'a';'a';'b';'b';'c';'c';
                  'd';'d';'d';'d';'e';'e';'e';'e';'e';'e';'e';'e';'e';
                  'e';'e';'e';'f';'f';'g';'g';'g';'h';'h';'i';'i';'i';
@@ -52,6 +51,32 @@ let rec init_player_cards g num_players =
   else
     init_player_cards (g |> replenish_hand |> rotate) (num_players - 1)
 
+let rec get_nth lst n =
+  match lst with
+  | [] -> failwith "Not possible"
+  | h::t -> (if n = 0 then
+              h
+             else
+              get_nth t (n - 1))
+
+let pick_random index =
+  let all_names = [["a"]; ["b"]; ["c"]; ["d"]; ["e"]; ["f"]] in
+  let names = get_nth all_names index in
+  let r = Random.int (List.length names) in
+  get_nth names r
+
+let get_ai_name difficulty =
+  let index =
+    match difficulty with
+    | 1 -> 0
+    | 2 -> 1
+    | 3 -> 2
+    | 4 -> 3
+    | 5 -> 4
+    | 42 -> 5
+    | _ -> failwith "Invalid difficulty"
+  in
+  pick_random index
 
 let create_player_list num_p num_ai ai_diffs =
   let rec create pl ai acc diffs = match (pl, ai) with
@@ -65,7 +90,8 @@ let create_player_list num_p num_ai ai_diffs =
     | (t,v) -> (match diffs with
                 | [] -> failwith "Not possible"
                 | head::tail ->
-                 (let new_player = { name = "CPU " ^ (string_of_int v);
+                 (let new_player = { name = get_ai_name head ^
+                                            " (CPU " ^ (string_of_int v) ^ ")";
                                      hand = [];
                                      words = [];
                                      difficulty = head
@@ -152,6 +178,7 @@ let rec input_ai_diffs num_AI counter =
         input_ai_diffs num_AI counter
 
 let init () =
+  Random.self_init ();
   print_string "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
   print_string "Welcome to OCaml World Rummy v1.2\n\n";
   print_string ("NOTE: To abort a build, steal, or extend, enter a period as " ^
@@ -260,14 +287,7 @@ let rec resolve_steal_conflict candidates =
       let () = print_string "That's an invalid number, try again!" in
       resolve_steal_conflict candidates
     else
-      let rec get_nth lst n =
-        match lst with
-        | [] -> failwith "Not possible"
-        | h::t -> (if n = 0 then
-                    h
-                   else
-                    get_nth t (n - 1))
-      in get_nth candidates (input - 1)
+      get_nth candidates (input - 1)
   with
   | _ -> print_string "That's an invalid number, try again!";
          resolve_steal_conflict candidates
