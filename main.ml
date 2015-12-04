@@ -113,7 +113,7 @@ let draw_turn g (tri_d, hash_d) =
     discard_card after_draw (String.get discard_letter_string 0)
   else
     let _ = print_string ("That was an invalid choice...as a result, " ^
-                                         "you discarded the card you drew.") in
+                                         "you discarded the card you drew.\n") in
     discard_card after_draw (drawn_card)
 
 let rec build_turn g (tri_d, hash_d) =
@@ -124,7 +124,7 @@ let rec build_turn g (tri_d, hash_d) =
   if is_valid_build hash_d new_word hand then
     build g new_word
   else
-    let _ = print_string "That was an invalid choice...let's try that again." in
+    let _ = print_string "That was an invalid choice...let's try that again.\n" in
     (build_turn g (tri_d, hash_d))
 
 let rec extend_turn g (tri_d, hash_d) =
@@ -138,12 +138,12 @@ let rec extend_turn g (tri_d, hash_d) =
             (is_valid_construct hash_d old_word new_word curr_player.hand) then
     extend g old_word new_word
   else
-    let _ = print_string "That was an invalid choice...let's try that again." in
+    let _ = print_string "That was an invalid choice...let's try that again.\n" in
     extend_turn g (tri_d, hash_d)
 
 let rec steal_turn g (tri_d, hash_d) =
   print_string ("Enter the name of the player you wish to steal from " ^
-                                        "(capitalization and spacing MATTERS!");
+                                        "(capitalization and spacing MATTERS): ");
   let name = read_line () in
   let finder = fun x -> (x.name = name) in
   if List.exists finder g.players then
@@ -158,10 +158,10 @@ let rec steal_turn g (tri_d, hash_d) =
             (is_valid_construct hash_d old_word new_word this_player.hand) then
       steal g curr_player.name old_word new_word
     else
-      let _ = print_string "That was an invalid choice...let's try that again." in
+      let _ = print_string "That was an invalid choice...let's try that again.\n" in
       steal_turn g (tri_d, hash_d)
   else
-    let _ = print_string "That was an invalid choice...let's try that again." in
+    let _ = print_string "That was an invalid choice...let's try that again.\n" in
     steal_turn g (tri_d, hash_d)
 
 let rec human_turn g (tri_d, hash_d) =
@@ -185,6 +185,7 @@ let rec turn g (tri_d, hash_d) =
     print_result g
   else
     let curr_player = List.hd g.players in
+    print_string "--------------------------------------------------------\n";
     Printf.printf "It is now %s's turn.\n\n" curr_player.name;
     print_string (string_of_game g);
     let new_gs =
