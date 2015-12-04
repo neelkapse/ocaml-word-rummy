@@ -122,11 +122,15 @@ let rec input_pre_dictionary () =
   let () = print_string "Do you want to use the default dictionary? (Y/N)\n" in
   let () = print_string "> " in
   let input = String.uppercase (read_line ()) in
-  match String.get input 0 with
-  | 'Y' -> "SixtyK.txt"
-  | 'N' -> input_dictionary ()
-  | _ -> let () = print_string "Invalid input, try again!" in
-         input_pre_dictionary ()
+  if String.length input = 0 then
+    let () = print_string "Invalid input, try again!\n" in
+    input_pre_dictionary ()
+  else
+    match String.get input 0 with
+    | 'Y' -> "SixtyK.txt"
+    | 'N' -> input_dictionary ()
+    | _ -> let () = print_string "Invalid input, try again!\n" in
+           input_pre_dictionary ()
 
 let rec input_ai_diffs num_AI counter =
   if counter > num_AI then
@@ -315,9 +319,38 @@ let rec steal_turn g (tri_d, hash_d) =
             "contain all letters within the original word\nTry again.\n") in
                                                     steal_turn g (tri_d, hash_d))
 
+let rec check_turn g hash_d =
+  print_string ("Enter the word that you'd like to check: \n> ");
+  let word = String.uppercase (read_line ()) in
+  let word_c = string_to_word word in
+  let score = Toolbox.word_value word_c in
+  let valid = Hashtbl.mem hash_d word_c in
+  let () =
+    if valid = false then
+      print_string ("That's not a word!\n")
+    else
+      print_string
+        (word ^ " will give you " ^ (string_of_int score) ^ " points!\n")
+  in
+  let rec another_input g hash_d =
+    print_string ("Check another word? (Y/N)\n> ");
+    let another = String.uppercase (read_line ()) in
+    if String.length another = 0 then
+      let () = print_string "Invalid input, try again\n" in
+      another_input g hash_d
+    else
+      match String.get another 0 with
+      | 'Y' -> check_turn g hash_d
+      | 'N' -> g
+      | _ -> let () = print_string "Invalid input, try again!\n" in
+             another_input g hash_d
+  in another_input g hash_d
+
+
 let rec human_turn g (tri_d, hash_d) =
   print_string ("\nTo steal a word, enter S.\nTo build a word, enter B.\n" ^
-    "To extend one of your words, enter E.\nTo draw a card, enter D.\n> ");
+    "To extend one of your words, enter E.\nTo draw a card, enter D.\n" ^
+    "To check the score of a word, enter C.\n> ");
   let input = String.uppercase (read_line ()) in
   if String.length input = 0 then
     let () = print_string "Invalid input, try again!\n" in
@@ -328,6 +361,7 @@ let rec human_turn g (tri_d, hash_d) =
       | 'S' -> steal_turn g (tri_d, hash_d)
       | 'B' -> build_turn g (tri_d, hash_d)
       | 'E' -> extend_turn g (tri_d, hash_d)
+      | 'C' -> check_turn g hash_d
       | _ -> print_string "Invalid input, try again!\n";
                                                       human_turn g (tri_d, hash_d)
 
