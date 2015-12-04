@@ -115,7 +115,7 @@ let rec input_dictionary () =
          input_dictionary ()
 
 let init () =
-  print_string "\n";
+  print_string "\nWelcome to OCaml World Rummy v1.2\n\n";
   let num_players = input_num_humans () in
   let num_AI = input_num_ai num_players in
   let filename = input_dictionary () in
