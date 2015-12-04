@@ -53,23 +53,26 @@ let rec init_player_cards g num_players =
     init_player_cards (g |> replenish_hand |> rotate) (num_players - 1)
 
 
-let create_player_list num_p num_ai =
-  let rec create pl ai acc = match (pl, ai) with
+let create_player_list num_p num_ai ai_diffs =
+  let rec create pl ai acc diffs = match (pl, ai) with
     | (0,0) -> acc
     | (t,0) -> let new_player = { name = "Player " ^ (string_of_int t);
                                   hand = [];
                                   words = [];
-                                  is_ai = false
+                                  difficulty = 0
                                 }
-                              in create (t-1) 0 (new_player::acc)
-    | (t,v) -> let new_player = { name = "CPU " ^ (string_of_int v);
-                                  hand = [];
-                                  words = [];
-                                  is_ai = true
-                                }
-                                in create t (v-1) (new_player::acc)
+                              in create (t-1) 0 (new_player::acc) diffs
+    | (t,v) -> (match diffs with
+                | [] -> failwith "Not possible"
+                | head::tail ->
+                 (let new_player = { name = "CPU " ^ (string_of_int v);
+                                     hand = [];
+                                     words = [];
+                                     difficulty = head
+                                   }
+                  in create t (v-1) (new_player::acc) tail))
   in
-  create num_p num_ai []
+  create num_p num_ai [] ai_diffs
 
 let rec input_num_humans () =
   let () = print_string "Enter the number of human players: " in
@@ -115,6 +118,35 @@ let rec input_dictionary () =
   | _ -> let () = print_string "That file wasn't found, try again!\n" in
          input_dictionary ()
 
+let rec input_pre_dictionary () =
+  let () = print_string "Do you want to use the default dictionary? (Y/N)\n" in
+  let () = print_string "> " in
+  let input = String.uppercase (read_line ()) in
+  match String.get input 0 with
+  | 'Y' -> "SixtyK.txt"
+  | 'N' -> input_dictionary ()
+  | _ -> let () = print_string "Invalid input, try again!" in
+         input_pre_dictionary ()
+
+let rec input_ai_diffs num_AI counter =
+  if counter > num_AI then
+    []
+  else
+    try
+      let () = print_string
+              ("Enter difficulty level of CPU " ^ string_of_int (counter) ^
+              " (1 - easiest, 5 - hardest): ") in
+      let diff = int_of_string (read_line()) in
+      if (diff < 1 || diff > 5) && diff <> 42 then
+        let () = print_string "That's not a valid level, try again!\n" in
+        input_ai_diffs num_AI counter
+      else
+        diff::(input_ai_diffs num_AI (counter + 1))
+    with
+    | _ ->
+        let () = print_string "That's not a valid level, try again!\n" in
+        input_ai_diffs num_AI counter
+
 let init () =
   print_string "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
   print_string "Welcome to OCaml World Rummy v1.2\n\n";
@@ -122,7 +154,8 @@ let init () =
                                                         "the first input!\n\n");
   let num_players = input_num_humans () in
   let num_AI = input_num_ai num_players in
-  let filename = input_dictionary () in
+  let ai_diffs = input_ai_diffs num_AI 1 in
+  let filename = input_pre_dictionary () in
   let dictionary = Hashtbl.create 80_000 in
   let ic = open_in filename in
   let rec insert_words (ic : in_channel) : unit =
@@ -134,7 +167,7 @@ let init () =
     | e -> () in
   let () = insert_words ic in
   let ai_trie = construct filename in
-  let player_list = create_player_list num_players num_AI in
+  let player_list = create_player_list num_players num_AI ai_diffs in
   let gs_without_cards = {
               deck = create_random_deck ();
               discarded = [];
@@ -207,13 +240,13 @@ let rec extend_turn g (tri_d, hash_d) =
 
 
 let rec steal_turn g (tri_d, hash_d) =
-  print_string ("Enter the name of the player you wish to steal\nfrom " ^
-                                      "(capitalization and spacing MATTERS): ");
-  let name = read_line () in
+  print_string ("Enter the name of the player you wish to steal from " ^
+                                      "(spaces matter!): ");
+  let name = String.uppercase (read_line ()) in
   if name = "." then
     g
   else
-    let finder = fun x -> (x.name = name) in
+    let finder = fun x -> (String.uppercase x.name = name) in
     if List.exists finder g.players then
       let curr_player = List.find finder g.players in
       let this_player = List.hd g.players in
@@ -269,7 +302,7 @@ let rec turn g (tri_d, hash_d) =
     Printf.printf "It is now %s's turn.\n\n" curr_player.name;
     print_string (string_of_game g);
     let new_gs =
-      if curr_player.is_ai then
+      if curr_player.difficulty <> 0 then
         ai_turn g (tri_d, hash_d)
       else
         human_turn g (tri_d, hash_d)
