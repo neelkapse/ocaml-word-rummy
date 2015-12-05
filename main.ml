@@ -4,6 +4,18 @@ open Toolbox
 open Trie
 open Player
 
+let print_game g = 
+  let open ANSITerminal in
+  let (board, hand, deck_size) = string_of_game g in
+  print_string [] ("\nDECK: There are " ^ deck_size ^ " cards left\n");
+  print_string [] "BOARD:\n";
+  print_endline board; 
+  print_endline "------------------------------------------------------";
+  print_endline "HAND:\t";
+  print_endline hand;
+  print_endline "______________________________________________________";
+  ()
+
 let print_result g =
   let open List in
   let open Printf in
@@ -11,7 +23,7 @@ let print_result g =
     | [] -> []
     | h::t ->
       (fold_left (fun acc x -> acc + word_value x) 0 h.words)::(create_score_list t) in
-  let _ = print_string (string_of_game g) in
+  let _ = print_game g in
   let score_list = create_score_list g.players in
   let max_score =
     match score_list with
@@ -407,7 +419,7 @@ let rec turn g (tri_d, hash_d) =
     let curr_player = List.hd g.players in
     print_string "\n______________________________________________________\n\n";
     Printf.printf "It is now %s's turn.\n\n" curr_player.name;
-    print_string (string_of_game g);
+    print_game g;
     let new_gs =
       if curr_player.difficulty <> 0 then
         ai_turn g (tri_d, hash_d)

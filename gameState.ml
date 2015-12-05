@@ -111,4 +111,5 @@ let string_of_game g =
   match g.players with
   | [] -> failwith "no_players"
   | p::_ -> 
-    "\nBOARD:\n" ^ string_of_player_list (g.players) ^ "\n--------------------------------------------------------\n" ^ "\nHAND:\t" ^ string_of_hand p ^ "\n________________________________________________________\n"
+    (string_of_player_list (g.players), string_of_hand p, 
+        string_of_int (List.length g.deck))
