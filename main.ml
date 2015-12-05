@@ -396,7 +396,7 @@ let rec human_turn g (tri_d, hash_d) =
 
 let ai_turn g (tri_d, hash_d) =
   print_string "The AI is thinking...\n";
-  let new_gs = AI.play_turn g tri_d in
+  let new_gs = AI.play_turn g tri_d 0 in
   print_string "The AI has made its turn.\n\n";
   new_gs
 
