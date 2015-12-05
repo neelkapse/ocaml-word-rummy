@@ -25,10 +25,15 @@ let ai_42 (l: word list): word option =
 let ai_d (l: word list) (d: int): word option =
   match l with
   | [] -> None
-  | _  -> 
+  | _  ->
     let len = List.length l in
     let (min, max) = ((d - 1)*len/5, d*len/5) in
-    let ind = min + Random.int (max - min) in
+    let ind = min +
+                if (max - min) > 0 then
+                  Random.int (max - min)
+                else
+                  0
+    in
     Some (List.nth l ind)
 
 let word_find (l: word list) (d: int): word option =
@@ -60,7 +65,7 @@ let play_no_steal (g: game) (p: player) (t: Trie.dict) (d: int): game =
     match g1.players with
     | p1::_ ->
       let c = (List.nth p1.hand (List.length p1.hand - 1)) in
-      discard_card g c
+      discard_card g1 c
     | []    -> failwith "no_players"
 
 let play_turn g t diff =
@@ -74,7 +79,7 @@ let play_turn g t diff =
           | 0 -> p.difficulty
           | _ -> diff in
   let flatten_words lst pl =
-    let remap l w = (pl.name, w, best_word t p.hand w diff)::l in
+    let remap l w = (pl.name, w, best_word t p.hand w d)::l in
     List.fold_left remap lst pl.words in
   (* If bword is Some bw, then generate the tuple (name, w, bw) and return the
    * tuple cons l. Otherwise, return l. *)
