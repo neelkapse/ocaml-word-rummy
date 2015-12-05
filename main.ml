@@ -29,7 +29,7 @@ let print_result g =
     printf "And....the winners are: %s"
       (fold_left (fun acc x -> acc ^ ", " ^ x.name) h.name t)
 
-let create_random_deck () =
+let create_random_deck num_players =
   let letters_l = ['a';'a';'a';'a';'a';'a';'a';'a';'a';'b';'b';'c';'c';
                  'd';'d';'d';'d';'e';'e';'e';'e';'e';'e';'e';'e';'e';
                  'e';'e';'e';'f';'f';'g';'g';'g';'h';'h';'i';'i';'i';
@@ -38,7 +38,12 @@ let create_random_deck () =
                  'p';'p';'q';'r';'r';'r';'r';'r';'r';'s';'s';'s';'s';
                  't';'t';'t';'t';'t';'t';'u';'u';'u';'u';'v';'v';'w';
                  'w';'x';'y';'y';'z'] in
-  let letters_k = letters_l @ letters_l in
+  let letters_k = match num_players with
+    | t when t <= 4 -> letters_l
+    | t when t <= 8 -> letters_l @ letters_l
+    | t when t <= 12 -> letters_l @ letters_l @ letters_l
+    | _ -> letters_l @ letters_l @ letters_l @ letters_l
+  in
   let letters = List.map (Char.uppercase) letters_k in
   let letters_with_weights = List.map (fun x -> (x, Random.int 500)) letters in
   let f x y = (snd x) - (snd y) in
@@ -185,6 +190,7 @@ let init () =
                                                         "the first input!\n\n");
   let num_players = input_num_humans () in
   let num_AI = input_num_ai num_players in
+  let num_total_players = num_players + num_AI in
   let ai_diffs = input_ai_diffs num_AI 1 in
   let filename = input_pre_dictionary () in
   let dictionary = Hashtbl.create 80_000 in
@@ -200,7 +206,7 @@ let init () =
   let ai_trie = construct filename in
   let player_list = create_player_list num_players num_AI ai_diffs in
   let gs_without_cards = {
-              deck = create_random_deck ();
+              deck = create_random_deck num_total_players;
               discarded = [];
               players = player_list
            }
