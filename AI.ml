@@ -14,6 +14,13 @@ let score_comp_pair (t1: steal_tup) (t2: steal_tup): steal_tup =
   let ((_,_,w1), (_,_,w2)) = (t1, t2) in
   if word_value w1 > word_value w2 then t1 else t2
 
+(* let AI_42 =
+let AI_1  =
+let AI_2  =
+let AI_3  =
+let AI_4  =
+let AI_5  = *)
+
 (* Return Some wd where wd is the best word that can be made from w and letters
  * if any word can be made. Return None if no word can be made. *)
 let best_word (t: Trie.dict) (letters: card list) (w: word): word option =
@@ -41,13 +48,14 @@ let play_no_steal (g: game) (p: player) (t: Trie.dict): game =
       discard_card g c
     | []    -> failwith "no_players"
 
-let play_turn g t =
+let play_turn g t d =
   (* For each word in pl.words, create a tuple containing pl.name, the best word
    * that can be generated from the word, and the word itself and then cons this
    * tuple to lst. *)
   let p = match g.players with
           | h::_ -> h
           | []   -> failwith "no_players" in
+  let d = p.difficulty in
   let flatten_words lst pl =
     let remap l w = (pl.name, w, best_word t p.hand w)::l in
     List.fold_left remap lst pl.words in
