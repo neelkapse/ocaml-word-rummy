@@ -38,11 +38,14 @@ let create_random_deck num_players =
                  'p';'p';'q';'r';'r';'r';'r';'r';'r';'s';'s';'s';'s';
                  't';'t';'t';'t';'t';'t';'u';'u';'u';'u';'v';'v';'w';
                  'w';'x';'y';'y';'z'] in
-  let letters_k = match num_players with
-    | t when t <= 4 -> letters_l
-    | t when t <= 8 -> letters_l @ letters_l
-    | t when t <= 12 -> letters_l @ letters_l @ letters_l
-    | _ -> letters_l @ letters_l @ letters_l @ letters_l
+  let letters_k =
+    let rec make_letters num =
+      if num <= 4 then
+        letters_l
+      else
+        letters_l @ (make_letters (num_players - 4))
+    in
+    make_letters num_players
   in
   let letters = List.map (Char.uppercase) letters_k in
   let letters_with_weights = List.map (fun x -> (x, Random.int 500)) letters in
