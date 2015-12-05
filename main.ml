@@ -158,7 +158,7 @@ let rec input_pre_dictionary () =
     input_pre_dictionary ()
   else
     match String.get input 0 with
-    | 'Y' -> "SixtyK.txt"
+    | 'Y' -> "default_dict.txt"
     | 'N' -> input_dictionary ()
     | _ -> let () = print_string "Invalid input, try again!\n" in
            input_pre_dictionary ()
