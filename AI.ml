@@ -23,6 +23,7 @@ let ai_42 (l: word list): word option =
   | []   -> None
 
 let ai_d (l: word list) (d: int): word option =
+  let comp w1 w2 = word_value w1 - word_value w2 in
   match l with
   | [] -> None
   | _  ->
@@ -34,7 +35,7 @@ let ai_d (l: word list) (d: int): word option =
                 else
                   0
     in
-    Some (List.nth l ind)
+    Some (List.nth (List.sort comp l) ind)
 
 let word_find (l: word list) (d: int): word option =
   match d with

@@ -4,12 +4,12 @@ open Toolbox
 open Trie
 open Player
 
-let print_game g = 
+let print_game g =
   let open ANSITerminal in
   let (board, hand, deck_size) = string_of_game g in
   print_string [] ("\nDECK: There are " ^ deck_size ^ " cards left\n");
   print_string [] "BOARD:\n";
-  print_endline board; 
+  print_endline board;
   print_endline "------------------------------------------------------";
   print_endline "HAND:\t";
   print_endline hand;
@@ -36,9 +36,9 @@ let print_result g =
                                                               |> split |> fst in
   match winners with
   | [] -> failwith "no_winner"
-  | [x] -> printf "And...the winner is :\t%s!!! Congratulations!" x.name
+  | [x] -> printf "And...the winner is :\t%s! Congratulations!\n" x.name
   | h::t ->
-    printf "And....the winners are: %s"
+    printf "And....the winners are: %s! Congratulations!\n"
       (fold_left (fun acc x -> acc ^ ", " ^ x.name) h.name t)
 
 let create_random_deck num_players =
