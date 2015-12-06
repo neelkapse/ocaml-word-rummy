@@ -4,15 +4,8 @@ open Toolbox
 
 type steal_tup = string * word * word
 
-(* Return the word with the higher score (return w2 if the scores are equal). *)
 let score_comp (w1: word) (w2: word): word =
   if word_value w1 > word_value w2 then w1 else w2
-
-(* Return the pair containing the word with the higher score (return t2 if the
- * scores are equal). *)
-let score_comp_pair (t1: steal_tup) (t2: steal_tup): steal_tup =
-  let ((_,_,w1), (_,_,w2)) = (t1, t2) in
-  if word_value w1 > word_value w2 then t1 else t2
 
 let ai_42 (l: word list): word option =
   match l with
@@ -27,11 +20,8 @@ let ai_d (l: word list) (d: int): word option =
     let len = List.length l in
     let (min, max) = ((d - 1)*len/5, d*len/5) in
     let ind = min +
-                if (max - min) > 0 then
-                  Random.int (max - min)
-                else
-                  0
-    in
+      if (max - min) > 0 then Random.int (max - min)
+      else 0 in
     Some (List.nth (List.sort comp l) ind)
 
 let word_find (l: word list) (d: int): word option =
@@ -47,9 +37,24 @@ let best_word (t: Trie.dict) (l: card list) (w: word) (d: int): word option =
   let is_valid_word = is_valid_construct_ai w in
   word_find (List.filter is_valid_word gen_words) d
 
+(* Return Some wd where wd is the best word that can be made from l if any word
+ * can be made. Return None if no word can be made. *)
 let best_word_build (t: Trie.dict) (l: card list) (d: int): word option =
   let gen_words = Trie.get_words t l in
   word_find gen_words d
+
+let score_comp_pair (t1: steal_tup) (t2: steal_tup): steal_tup =
+  let ((_,_,w1), (_,_,w2)) = (t1, t2) in
+  if word_value w1 > word_value w2 then t1 else t2
+
+let rand_tup_d (l: steal_tup list) (d: int): word =
+  let comp (_,_,w1) (_,_,w2) = word_value w1 - word_value w2 in
+  let len = List.length l in
+  let (min, max) = ((d - 1)*len/5, d*len/5) in
+  let ind = min +
+    if (max - min) > 0 then Random.int (max - min)
+    else 0 in
+  List.nth (List.sort comp l) ind
 
 let play_steal (g: game) (p: player) ((n, w, bw): steal_tup): game =
   if p.name = n then extend g w bw
@@ -90,7 +95,5 @@ let play_turn g t diff =
     |> List.fold_left opt_filter [] in
   match (steal_word_list, d) with
   | (h::t, 42) -> play_steal g p (List.fold_left score_comp_pair h t)
-  | (h::t, _)  -> (match ai_d steal_word_list d with
-                   | Some w -> play_steal g p w
-                   | None   -> assert false)
+  | (h::t, _)  -> play_steal g p (rand_tup_d steal_word_list d)
   | ([], _)    -> play_no_steal g p t d
