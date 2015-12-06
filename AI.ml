@@ -47,7 +47,7 @@ let score_comp_pair (t1: steal_tup) (t2: steal_tup): steal_tup =
   let ((_,_,w1), (_,_,w2)) = (t1, t2) in
   if word_value w1 > word_value w2 then t1 else t2
 
-let rand_tup_d (l: steal_tup list) (d: int): word =
+let rand_tup_d (l: steal_tup list) (d: int): steal_tup =
   let comp (_,_,w1) (_,_,w2) = word_value w1 - word_value w2 in
   let len = List.length l in
   let (min, max) = ((d - 1)*len/5, d*len/5) in
