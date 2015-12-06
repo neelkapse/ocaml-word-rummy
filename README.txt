@@ -1,6 +1,3 @@
-Hi grader!
-
-
 Neel Kapse
 Manvith Narahari
 Karun Singh
@@ -23,9 +20,9 @@ Running in the class VM:
 When prompted whether you would like to use a custom dictionary, you may use 
 our default dictionary, or one of our special dictionaries. You can also use
 your own dictionary by placing it in the src folder and typing in the file 
-name when prompted!
+name when prompted.
 
 	default_dict.txt	The default dictionary is oriented towards word games.
 	bible_dict.txt		Only terms used in the bible (lots of fun with AI!)
-	dos_dict.txt		DOS commands (for the hardcore Windows lovers).
-	pl_dict.txt			Programming language names! For the versatile PL-guy.
+	dos_dict.txt		  DOS commands (for the hardcore Windows lovers).
+	pl_dict.txt			  Programming language names! For the versatile PL-guy.
