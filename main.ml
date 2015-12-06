@@ -62,7 +62,7 @@ let print_result g =
     print_string [] "! Congratulations!\n\n"
   | h::t ->
     print_string [] "\nAnd...the winners are: ";
-    print_string [Bold; yellow] 
+    print_string [Bold; yellow]
       (fold_left (fun acc x -> acc ^ ", " ^ x.name) h.name t);
     print_string [] "! Congratulations!\n\n"
 
@@ -178,7 +178,7 @@ let rec input_num_ai num_players =
 
 let rec input_dictionary () =
   let () = print_string "Enter the file name of your dictionary: " in
-  let filename = sanitize (read_line()) in
+  let filename = String.trim (read_line()) in
   try
     let _ = open_in filename in
     filename
@@ -449,7 +449,7 @@ let rec human_turn g (tri_d, hash_d) =
       | 'B' -> build_turn g (tri_d, hash_d)
       | 'E' -> extend_turn g (tri_d, hash_d)
       | 'C' -> check_turn g hash_d
-      | _ -> 
+      | _ ->
         print_string [] "Invalid input, try again!\n";
         human_turn g (tri_d, hash_d)
 
