@@ -4,7 +4,7 @@ open Toolbox
 open Trie
 open Player
 
-let print_game g = 
+let print_game g =
   let open ANSITerminal in
   let rec print_players ps ws =
     match (ps, ws) with
