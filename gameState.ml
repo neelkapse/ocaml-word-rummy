@@ -106,8 +106,8 @@ let discard_card game card =
 let string_of_game g =
   let rec string_of_player_list ps =
     match ps with
-    | [] -> ""
-    | h::t -> (string_of_player h) ^ (string_of_player_list t) in
+    | [] -> []
+    | h::t -> (string_of_player h) :: (string_of_player_list t) in
   match g.players with
   | [] -> failwith "no_players"
   | p::_ -> 

@@ -6,19 +6,29 @@ open Player
 
 let print_game g = 
   let open ANSITerminal in
+  let rec print_players ps ws =
+    match (ps, ws) with
+    | ([], _) -> () 
+    | (_, []) -> failwith "player_print error"
+    | (p::pt, w::wt)  -> 
+      print_string [Bold; yellow] ("\t" ^ p.name);
+      print_string [] w;
+      print_players pt wt in
   let (board, hand, deck_size) = string_of_game g in
-  print_string [] ("\nDECK: There are " ^ deck_size ^ " cards left\n");
-  print_string [] "BOARD:\n";
-  print_endline board; 
-  print_endline "------------------------------------------------------";
-  print_endline "HAND:\t";
-  print_endline hand;
-  print_endline "______________________________________________________";
+  print_string [Bold] "\nDECK:"; 
+  print_string [] (" There are " ^ deck_size ^ " cards left\n");
+  print_string [Bold] "BOARD:\n";
+  print_players g.players board; 
+  print_string [cyan] "------------------------------------------------------";
+  print_string [Bold] "\nHAND:\t";
+  print_string [blue; on_white] hand;
+  print_string [red] "\n______________________________________________________\n";
   ()
 
 let print_result g =
   let open List in
   let open Printf in
+  let open ANSITerminal in
   let rec create_score_list = function
     | [] -> []
     | h::t ->
@@ -30,16 +40,19 @@ let print_result g =
     | [] -> failwith "no_players"
     | h::t -> fold_left (fun max x -> if x > max then x else max) h t in
   let _ = iter2
-    (fun x y -> printf "%s :\t%d\n" x.name y) g.players score_list in
+    (fun x y -> printf [] "%s :\t%d\n" x.name y) g.players score_list in
   let winners =
-    filter (fun (_,x) -> x = max_score) (combine g.players score_list)
-                                                              |> split |> fst in
+    filter (fun (_,x) -> x = max_score) 
+      (combine g.players score_list) |> split |> fst in
   match winners with
   | [] -> failwith "no_winner"
-  | [x] -> printf "And...the winner is :\t%s!!! Congratulations!" x.name
+  | [x] -> 
+    print_string [] "And...the winner is : ";
+    print_string [Bold; yellow] x.name;
+    print_string [] "!!! Congratulations!\n\n"
   | h::t ->
-    printf "And....the winners are: %s"
-      (fold_left (fun acc x -> acc ^ ", " ^ x.name) h.name t)
+    print_string [] "And....the winners are: ";
+    print_string [Bold; yellow] (fold_left (fun acc x -> acc ^ ", " ^ x.name) h.name t)
 
 let create_random_deck num_players =
   let letters_l = ['a';'a';'a';'a';'a';'a';'a';'a';'a';'b';'b';'c';'c';
@@ -198,11 +211,13 @@ let rec input_ai_diffs num_AI counter =
         input_ai_diffs num_AI counter
 
 let init () =
+  let open ANSITerminal in
   Random.self_init ();
-  print_string "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
-  print_string "Welcome to OCaml World Rummy v1.2\n\n";
-  print_string ("NOTE: To abort a build, steal, or extend, enter a period as " ^
-                                                        "the first input!\n\n");
+  print_string [] "\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
+  print_string [Bold] "Welcome to OCaml Word Rummy v1.2!\n\n";
+  print_string [] "\n\n\n\n\n\n";
+  print_string [] ("NOTE: To abort a build, steal, or extend, enter a period as " ^
+                                                        "the first input!\n\n\n\n\n");
   let num_players = input_num_humans () in
   let num_AI = input_num_ai num_players in
   let num_total_players = num_players + num_AI in
@@ -389,12 +404,31 @@ let rec check_turn g hash_d =
 
 
 let rec human_turn g (tri_d, hash_d) =
-  print_string ("\nTo steal a word, enter S.\nTo build a word, enter B.\n" ^
-    "To extend one of your words, enter E.\nTo draw a card, enter D.\n" ^
-    "To check the score of a word, enter C.\n> ");
+  let open ANSITerminal in
+  print_string [] "\nTo ";
+  print_string [Bold] "steal" ;
+  print_string [] " a word, enter ";
+  print_string [Bold] "S";
+  print_string [] ".\nTo ";
+  print_string [Bold] "build";
+  print_string [] " a word, enter ";
+  print_string [Bold] "B";
+  print_string [] ".\nTo ";
+  print_string [Bold] "extend";
+  print_string [] " one of your words, enter ";
+  print_string [Bold] "E";
+  print_string [] ".\nTo ";
+  print_string [Bold] "draw";
+  print_string [] " a card, enter ";
+  print_string [Bold] "D";
+  print_string [] ".\nTo check the ";
+  print_string [Bold] "score";
+  print_string [] " of a word, enter ";
+  print_string [Bold] "C";
+  print_string [] ".\n> ";
   let input = String.uppercase (read_line ()) in
   if String.length input = 0 then
-    let () = print_string "Invalid input, try again!\n" in
+    let () = print_string [] "Invalid input, try again!\n" in
     human_turn g (tri_d, hash_d)
   else
     match String.get input 0 with
@@ -403,7 +437,7 @@ let rec human_turn g (tri_d, hash_d) =
       | 'B' -> build_turn g (tri_d, hash_d)
       | 'E' -> extend_turn g (tri_d, hash_d)
       | 'C' -> check_turn g hash_d
-      | _ -> print_string "Invalid input, try again!\n";
+      | _ -> print_string [] "Invalid input, try again!\n";
                                                       human_turn g (tri_d, hash_d)
 
 let ai_turn g (tri_d, hash_d) =
@@ -413,12 +447,15 @@ let ai_turn g (tri_d, hash_d) =
   new_gs
 
 let rec turn g (tri_d, hash_d) =
+  let open ANSITerminal in
   if is_over g then
     print_result g
   else
     let curr_player = List.hd g.players in
-    print_string "\n______________________________________________________\n\n";
-    Printf.printf "It is now %s's turn.\n\n" curr_player.name;
+    print_string [red] "\n______________________________________________________\n\n";
+    print_string [] "It is now ";
+    print_string [Bold] curr_player.name;
+    print_string [] "'s turn.";
     print_game g;
     let new_gs =
       if curr_player.difficulty <> 0 then

@@ -72,6 +72,6 @@ val draw_card : game -> game
 val discard_card : game -> card -> game
 
 (* Returns a string tuple containing (board representation, current player's hand, deck size) *)
-val string_of_game : game -> (string * string * string)
+val string_of_game : game -> (string list * string * string)
 
 

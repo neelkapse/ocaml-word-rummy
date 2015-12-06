@@ -21,4 +21,5 @@ let string_of_player p =
     match List.length p.words with
     | 0 -> ""
     | _ -> List.fold_left f "" p.words in
-  "\t" ^ p.name ^ words ^ "\n"
+  words ^ "\n"
+  (* "\t" ^ p.name ^ words ^ "\n" *)
