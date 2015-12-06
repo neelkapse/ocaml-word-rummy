@@ -14,9 +14,6 @@ let score_comp_pair (t1: steal_tup) (t2: steal_tup): steal_tup =
   let ((_,_,w1), (_,_,w2)) = (t1, t2) in
   if word_value w1 > word_value w2 then t1 else t2
 
-let random_elem (l: steal_tup list): steal_tup =
-  List.nth l (Random.int (List.length l))
-
 let ai_42 (l: word list): word option =
   match l with
   | h::t -> Some (List.fold_left score_comp h t)
@@ -93,5 +90,7 @@ let play_turn g t diff =
     |> List.fold_left opt_filter [] in
   match (steal_word_list, d) with
   | (h::t, 42) -> play_steal g p (List.fold_left score_comp_pair h t)
-  | (h::t, _)  -> play_steal g p (random_elem steal_word_list)
+  | (h::t, _)  -> (match ai_d steal_word_list d with
+                   | Some w -> play_steal g p w
+                   | None   -> assert false)
   | ([], _)    -> play_no_steal g p t d
