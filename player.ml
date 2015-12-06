@@ -22,4 +22,3 @@ let string_of_player p =
     | 0 -> ""
     | _ -> List.fold_left f "" p.words in
   words ^ "\n"
-  (* "\t" ^ p.name ^ words ^ "\n" *)

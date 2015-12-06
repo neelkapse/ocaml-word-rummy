@@ -110,6 +110,6 @@ let string_of_game g =
     | h::t -> (string_of_player h) :: (string_of_player_list t) in
   match g.players with
   | [] -> failwith "no_players"
-  | p::_ -> 
-    (string_of_player_list (g.players), string_of_hand p, 
+  | p::_ ->
+    (string_of_player_list (g.players), String.trim (string_of_hand p),
         string_of_int (List.length g.deck))
