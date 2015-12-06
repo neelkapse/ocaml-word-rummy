@@ -37,7 +37,8 @@ let print_result g =
   let rec create_score_list = function
     | [] -> []
     | h::t ->
-      (fold_left (fun acc x -> acc + word_value x) 0 h.words)::(create_score_list t) in
+      (fold_left (fun acc x -> acc + word_value x) 0 h.words)::
+        (create_score_list t) in
   let _ = print_game g in
   let score_list = create_score_list g.players in
   let max_score =
@@ -61,7 +62,8 @@ let print_result g =
     print_string [] "! Congratulations!\n\n"
   | h::t ->
     print_string [] "\nAnd...the winners are: ";
-    print_string [Bold; yellow] (fold_left (fun acc x -> acc ^ ", " ^ x.name) h.name t);
+    print_string [Bold; yellow] 
+      (fold_left (fun acc x -> acc ^ ", " ^ x.name) h.name t);
     print_string [] "! Congratulations!\n\n"
 
 let create_random_deck num_players =
@@ -447,8 +449,9 @@ let rec human_turn g (tri_d, hash_d) =
       | 'B' -> build_turn g (tri_d, hash_d)
       | 'E' -> extend_turn g (tri_d, hash_d)
       | 'C' -> check_turn g hash_d
-      | _ -> print_string [] "Invalid input, try again!\n";
-                                                      human_turn g (tri_d, hash_d)
+      | _ -> 
+        print_string [] "Invalid input, try again!\n";
+        human_turn g (tri_d, hash_d)
 
 let ai_turn g (tri_d, hash_d) =
   print_string "The AI is thinking...\n";
